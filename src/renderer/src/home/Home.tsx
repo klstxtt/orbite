@@ -35,6 +35,8 @@ interface Props {
   wallpaper: string | null
   /** Vrai : l'image du jeu sélectionné passe avant le fond du thème. */
   preferHero: boolean
+  /** Vrai : le contour de sélection prend la couleur de la jaquette. */
+  coverAccent: boolean
   onActivateProfile: (profile: ProfileView) => void
   /** Jeu sur lequel amener la sélection (après un ajout) ; `nonce` change à chaque demande. */
   reveal: { id: string; nonce: number } | null
@@ -51,6 +53,7 @@ export function Home({
   activeProfileId,
   wallpaper,
   preferHero,
+  coverAccent,
   reveal,
   onLaunch,
   onAdd,
@@ -154,7 +157,7 @@ export function Home({
         focusedProfile={zone === 'profiles' ? Math.min(profileIndex, profiles.length - 1) : -1}
         title={game?.title ?? 'Cartouche vide'}
       />
-      <GameRow slots={slots} selected={gameIndex} focused={zone === 'row'} />
+      <GameRow slots={slots} selected={gameIndex} focused={zone === 'row'} coverAccent={coverAccent} />
       <ShortcutBar selected={barIndex} focused={zone === 'bar'} />
       <div className={s.padState} data-on={padConnected} title={padConnected ? 'Manette branchée' : 'Aucune manette'}>
         <GamepadIcon />

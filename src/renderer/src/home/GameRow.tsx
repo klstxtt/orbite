@@ -1,4 +1,5 @@
 import { memo, type CSSProperties, type ReactElement } from 'react'
+import { accentTriple } from '../../../shared/color'
 import type { GameView } from '../../../shared/types'
 import { CartridgeIcon } from './icons'
 import s from './home.module.css'
@@ -26,19 +27,22 @@ interface Props {
   selected: number
   /** La rangée a le focus (sinon le contour reste, atténué et immobile). */
   focused: boolean
+  /** Vrai : la tuile sélectionnée prend la couleur d'accent de sa jaquette. */
+  coverAccent: boolean
 }
 
 /**
  * Rangée horizontale. Chaque tuile est posée en `transform` : la sélection reste à gauche,
  * elle seule est à taille réelle, les autres sont réduites (réduire reste net, agrandir floute).
  */
-export const GameRow = memo(function GameRow({ slots, selected, focused }: Props): ReactElement {
+export const GameRow = memo(function GameRow({ slots, selected, focused, coverAccent }: Props): ReactElement {
   return (
     <div className={s.row}>
       <div className={s.track} style={{ '--tx': -selected * STEP_VH } as CSSProperties}>
         {slots.map((game, i) => {
           if (i < selected - WINDOW_BEFORE || i > selected + WINDOW_AFTER) return null
           const isSelected = i === selected
+          const accent = isSelected && coverAccent && game?.accent ? accentTriple(game.accent) : null
           const x = i <= selected ? i * STEP_VH : selected * STEP_VH + TILE_VH + GAP_VH + (i - selected - 1) * STEP_VH
           return (
             <div
@@ -46,7 +50,13 @@ export const GameRow = memo(function GameRow({ slots, selected, focused }: Props
               className={s.tile}
               data-selected={isSelected}
               data-focused={isSelected && focused}
-              style={{ '--x': x, '--s': isSelected ? 1 : SMALL_SCALE } as CSSProperties}
+              style={
+                {
+                  '--x': x,
+                  '--s': isSelected ? 1 : SMALL_SCALE,
+                  ...(accent ? { '--accent-a': accent.a, '--accent-b': accent.b, '--accent-c': accent.c } : {})
+                } as CSSProperties
+              }
             >
               <div className={s.glow} />
               <div className={s.ring}>

@@ -46,7 +46,7 @@ export class LibraryService {
       exe,
       args: [],
       cwd: '',
-      art: { cover: '', hero: '' },
+      art: { cover: '', hero: '', accent: '' },
       addedAt: Date.now()
     })
   }
@@ -60,7 +60,7 @@ export class LibraryService {
       emulatorId,
       gameFile,
       extraArgs: [],
-      art: { cover: '', hero: '' },
+      art: { cover: '', hero: '', accent: '' },
       addedAt: Date.now()
     })
   }
@@ -85,6 +85,13 @@ export class LibraryService {
       games: lib.games.map((g) => (g.id === id ? { ...g, art: { ...g.art, [slot]: file } } : g))
     }))
     return previous
+  }
+
+  setAccent(id: string, accent: string): void {
+    this.stores.library.update((lib) => ({
+      ...lib,
+      games: lib.games.map((g) => (g.id === id ? { ...g, art: { ...g.art, accent } } : g))
+    }))
   }
 
   profile(emulatorId: string): EmulatorProfile {

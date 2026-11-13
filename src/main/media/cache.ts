@@ -1,6 +1,7 @@
 import { rmSync } from 'fs'
 import { basename, join } from 'path'
 import sharp from 'sharp'
+import { vividAccent } from '../../shared/color'
 
 // Sans cache, sharp ne garde pas les fichiers ouverts : l'image d'origine reste déplaçable et supprimable.
 sharp.cache(false)
@@ -44,6 +45,17 @@ export async function coverIconPng(mediaDir: string, file: string, size = 256): 
     return await sharp(join(mediaDir, basename(file))).resize(size, size, { fit: 'cover' }).png().toBuffer()
   } catch {
     return null
+  }
+}
+
+/** Couleur d'accent d'une jaquette du cache (#rrggbb) ; vide si l'image est grise ou illisible. */
+export async function coverAccent(mediaDir: string, file: string): Promise<string> {
+  if (!file) return ''
+  try {
+    const pixels = await sharp(join(mediaDir, basename(file))).resize(48, 48, { fit: 'cover' }).removeAlpha().raw().toBuffer()
+    return vividAccent(pixels, 3)
+  } catch {
+    return ''
   }
 }
 

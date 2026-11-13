@@ -154,6 +154,7 @@ export function registerSettingsIpc(ctx: AppContext, handle: Handle): void {
       fullscreen: patch.fullscreen ?? c.fullscreen,
       homeBackdrop: patch.homeBackdrop ?? c.homeBackdrop,
       autoStart: patch.autoStart ?? c.autoStart,
+      coverAccent: patch.coverAccent ?? c.coverAccent,
       audio: { sfxVolume: patch.sfxVolume ?? c.audio.sfxVolume, muted: patch.muted ?? c.audio.muted },
       input: { swapConfirm: patch.swapConfirm ?? c.input.swapConfirm }
     }))

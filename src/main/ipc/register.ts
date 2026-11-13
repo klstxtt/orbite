@@ -14,7 +14,7 @@ import { isIgnoredPath, matchesExeName } from '../emulators/profiles'
 import type { Launcher } from '../launch/launcher'
 import { scanGameFiles, scanPcFolder } from '../library/importer'
 import type { LibraryService } from '../library/service'
-import { coverIconPng, mediaUrl, removeArt, storeArt } from '../media/cache'
+import { coverAccent, coverIconPng, mediaUrl, removeArt, storeArt } from '../media/cache'
 import type { Stores } from '../store/stores'
 import type { ThemeStore } from '../themes/store'
 import { registerSettingsIpc } from './settings'
@@ -44,6 +44,7 @@ export function buildState(ctx: AppContext): AppState {
       kind: g.kind,
       cover: mediaUrl(g.art.cover),
       hero: mediaUrl(g.art.hero),
+      accent: g.art.accent || null,
       available: ctx.library.isAvailable(g),
       lastPlayed: stats.lastPlayed[g.id] ?? 0,
       playtime: stats.playtime[`${config.activeProfile}|${g.id}`] ?? 0
@@ -60,7 +61,8 @@ export function buildState(ctx: AppContext): AppState {
       swapConfirm: config.input.swapConfirm,
       fullscreen: config.fullscreen,
       homeBackdrop: config.homeBackdrop,
-      autoStart: config.autoStart
+      autoStart: config.autoStart,
+      coverAccent: config.coverAccent
     },
     themes: ctx.themes.list().map((t) => {
       const stamp = ctx.themes.wallpaperStamp(t.id)
@@ -101,6 +103,19 @@ export async function launchGame(ctx: AppContext, gameId: string): Promise<void>
     profile: game.kind === 'emulated' ? ctx.library.profile(game.emulatorId) : null,
     iconPng: await coverIconPng(ctx.stores.mediaDir, game.art.cover)
   })
+}
+
+/** Jaquettes enregistrées avant l'arrivée des couleurs d'accent : calcule la leur une fois. */
+async function backfillAccents(ctx: AppContext): Promise<void> {
+  let changed = false
+  for (const game of ctx.library.games()) {
+    if (!game.art.cover || game.art.accent) continue
+    const accent = await coverAccent(ctx.stores.mediaDir, game.art.cover)
+    if (!accent) continue
+    ctx.library.setAccent(game.id, accent)
+    changed = true
+  }
+  if (changed) broadcast(ctx)
 }
 
 const NO_INPUT = z.undefined()
@@ -245,6 +260,7 @@ export function registerIpc(ctx: AppContext): void {
       return fail("Cette image n'a pas pu être lue.")
     }
     removeArt(ctx.stores.mediaDir, ctx.library.setArt(gameId, slot, file))
+    if (slot === 'cover') ctx.library.setAccent(gameId, await coverAccent(ctx.stores.mediaDir, file))
     broadcast(ctx)
     return ok(null)
   })
@@ -262,4 +278,5 @@ export function registerIpc(ctx: AppContext): void {
   handle(IPC.stopGame, NO_INPUT, () => ctx.launcher.stop())
 
   registerSettingsIpc(ctx, handle)
+  void backfillAccents(ctx)
 }

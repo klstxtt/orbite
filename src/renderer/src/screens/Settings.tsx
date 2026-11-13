@@ -85,12 +85,14 @@ export function SettingsHost({ overlay, state, open, notify }: HostProps<Setting
           items={[
             { id: 'fullscreen', label: 'Plein écran', detail: yesNo(settings.fullscreen) },
             { id: 'backdrop', label: 'Fond de l’accueil', detail: settings.homeBackdrop === 'hero' ? 'image du jeu' : 'fond du thème' },
+            { id: 'accent', label: 'Contour à la couleur de la jaquette', detail: yesNo(settings.coverAccent) },
             { id: 'swap', label: 'Inverser A et B', detail: yesNo(settings.swapConfirm) }
           ]}
           onBack={() => open({ type: 'settings' })}
           onSelect={(id) => {
             if (id === 'fullscreen') set({ fullscreen: !settings.fullscreen })
             else if (id === 'backdrop') set({ homeBackdrop: settings.homeBackdrop === 'hero' ? 'theme' : 'hero' })
+            else if (id === 'accent') set({ coverAccent: !settings.coverAccent })
             else set({ swapConfirm: !settings.swapConfirm })
           }}
         />

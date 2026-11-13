@@ -35,6 +35,8 @@ export const ConfigSchema = z.object({
   homeBackdrop: z.enum(['hero', 'theme']).default('hero'),
   /** Lancer le lanceur à l'ouverture de session Windows. */
   autoStart: z.boolean().default(false),
+  /** Le contour de sélection prend la couleur de la jaquette du jeu. */
+  coverAccent: z.boolean().default(true),
   audio: z
     .object({ sfxVolume: z.number().min(0).max(100).default(70), muted: z.boolean().default(false) })
     .prefault({}),
@@ -50,7 +52,14 @@ const gameBase = {
   id: z.string().min(1).max(64),
   title: z.string().min(1).max(120),
   /** Noms de fichiers dans le dossier `media/` ; vide = pas d'image. */
-  art: z.object({ cover: z.string().default(''), hero: z.string().default('') }).prefault({}),
+  art: z
+    .object({
+      cover: z.string().default(''),
+      hero: z.string().default(''),
+      /** Couleur vive tirée de la jaquette (#rrggbb) ; vide = couleurs du thème. */
+      accent: z.string().default('')
+    })
+    .prefault({}),
   addedAt: z.number().default(0)
 }
 
@@ -184,7 +193,8 @@ export const SettingsPatchSchema = z
     swapConfirm: z.boolean(),
     fullscreen: z.boolean(),
     homeBackdrop: z.enum(['hero', 'theme']),
-    autoStart: z.boolean()
+    autoStart: z.boolean(),
+    coverAccent: z.boolean()
   })
   .partial()
   .strict()

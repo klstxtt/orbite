@@ -9,6 +9,8 @@ export interface GameView {
   cover: string | null
   /** URL de la grande image de fond, ou null. */
   hero: string | null
+  /** Couleur d'accent tirée de la jaquette (#rrggbb), ou null. */
+  accent: string | null
   /** Faux si le programme ou le fichier du jeu a disparu. */
   available: boolean
   /** Dernier lancement (ms), 0 si jamais lancé. */
@@ -39,6 +41,7 @@ export interface SettingsView {
   fullscreen: boolean
   homeBackdrop: 'hero' | 'theme'
   autoStart: boolean
+  coverAccent: boolean
 }
 
 export interface EmulatorView {

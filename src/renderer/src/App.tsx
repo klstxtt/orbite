@@ -93,6 +93,7 @@ export function App(): ReactElement | null {
         activeProfileId={state.activeProfile}
         wallpaper={theme.wallpaperUrl}
         preferHero={state.settings.homeBackdrop === 'hero'}
+        coverAccent={state.settings.coverAccent}
         reveal={reveal}
         onLaunch={launch}
         onAdd={() => setOverlay({ type: 'add' })}
