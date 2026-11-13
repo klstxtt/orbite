@@ -63,7 +63,8 @@ export function buildState(ctx: AppContext): AppState {
       homeBackdrop: config.homeBackdrop,
       autoStart: config.autoStart,
       coverAccent: config.coverAccent,
-      sortRecent: config.sortRecent
+      sortRecent: config.sortRecent,
+      rumble: config.input.rumble
     },
     themes: ctx.themes.list().map((t) => {
       const stamp = ctx.themes.wallpaperStamp(t.id)

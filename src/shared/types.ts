@@ -43,6 +43,7 @@ export interface SettingsView {
   autoStart: boolean
   coverAccent: boolean
   sortRecent: boolean
+  rumble: boolean
 }
 
 export interface EmulatorView {

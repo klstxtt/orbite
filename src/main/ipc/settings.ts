@@ -157,7 +157,7 @@ export function registerSettingsIpc(ctx: AppContext, handle: Handle): void {
       coverAccent: patch.coverAccent ?? c.coverAccent,
       sortRecent: patch.sortRecent ?? c.sortRecent,
       audio: { sfxVolume: patch.sfxVolume ?? c.audio.sfxVolume, muted: patch.muted ?? c.audio.muted },
-      input: { swapConfirm: patch.swapConfirm ?? c.input.swapConfirm }
+      input: { swapConfirm: patch.swapConfirm ?? c.input.swapConfirm, rumble: patch.rumble ?? c.input.rumble }
     }))
     if (patch.fullscreen !== undefined) ctx.window()?.setFullScreen(patch.fullscreen)
     broadcast(ctx)

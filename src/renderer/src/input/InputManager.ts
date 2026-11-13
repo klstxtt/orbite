@@ -31,6 +31,10 @@ class InputManager {
   private users = 0
   /** Inverse valider et retour (bouton de droite = valider). */
   swapConfirm = false
+  /** Courte vibration de la manette à chaque validation. */
+  rumble = true
+  /** Manette qui a validé en dernier : c'est elle qui vibre. */
+  private confirmPad = 0
 
   /** Démarre l'écoute ; la fonction renvoyée l'arrête. */
   start(): () => void {
@@ -85,14 +89,28 @@ class InputManager {
       if (pressed(PAD.right) || x > STICK_THRESHOLD) down.add('right')
       if (pressed(PAD.up) || y < -STICK_THRESHOLD) down.add('up')
       if (pressed(PAD.down) || y > STICK_THRESHOLD) down.add('down')
-      if (pressed(this.swapConfirm ? PAD.b : PAD.a)) down.add('confirm')
+      if (pressed(this.swapConfirm ? PAD.b : PAD.a)) {
+        down.add('confirm')
+        this.confirmPad = pad.index
+      }
       if (pressed(this.swapConfirm ? PAD.a : PAD.b)) down.add('back')
       if (pressed(PAD.y)) down.add('options')
       if (pressed(PAD.start)) down.add('menu')
       if (pressed(PAD.lb)) down.add('prevTab')
       if (pressed(PAD.rb)) down.add('nextTab')
     }
-    for (const action of this.tracker.update(down, now)) this.emit(action)
+    for (const action of this.tracker.update(down, now)) {
+      if (action === 'confirm') this.pulse()
+      this.emit(action)
+    }
+  }
+
+  /** Vibration brève ; sans effet sur une manette sans moteur. */
+  private pulse(): void {
+    if (!this.rumble) return
+    const actuator = navigator.getGamepads()[this.confirmPad]?.vibrationActuator
+    if (!actuator) return
+    actuator.playEffect('dual-rumble', { duration: 70, weakMagnitude: 0.55, strongMagnitude: 0.25 }).catch(() => undefined)
   }
 }
 

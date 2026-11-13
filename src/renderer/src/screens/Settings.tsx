@@ -87,7 +87,8 @@ export function SettingsHost({ overlay, state, open, notify }: HostProps<Setting
             { id: 'backdrop', label: 'Fond de l’accueil', detail: settings.homeBackdrop === 'hero' ? 'image du jeu' : 'fond du thème' },
             { id: 'sort', label: 'Ordre des jeux', detail: settings.sortRecent ? 'joués récemment d’abord' : 'ordre d’ajout' },
             { id: 'accent', label: 'Contour à la couleur de la jaquette', detail: yesNo(settings.coverAccent) },
-            { id: 'swap', label: 'Inverser A et B', detail: yesNo(settings.swapConfirm) }
+            { id: 'swap', label: 'Inverser A et B', detail: yesNo(settings.swapConfirm) },
+            { id: 'rumble', label: 'Vibration à la validation', detail: yesNo(settings.rumble) }
           ]}
           onBack={() => open({ type: 'settings' })}
           onSelect={(id) => {
@@ -95,6 +96,7 @@ export function SettingsHost({ overlay, state, open, notify }: HostProps<Setting
             else if (id === 'backdrop') set({ homeBackdrop: settings.homeBackdrop === 'hero' ? 'theme' : 'hero' })
             else if (id === 'sort') set({ sortRecent: !settings.sortRecent })
             else if (id === 'accent') set({ coverAccent: !settings.coverAccent })
+            else if (id === 'rumble') set({ rumble: !settings.rumble })
             else set({ swapConfirm: !settings.swapConfirm })
           }}
         />

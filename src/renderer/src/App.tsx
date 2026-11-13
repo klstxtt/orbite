@@ -76,6 +76,7 @@ export function App(): ReactElement | null {
     if (!settings) return
     setSfxVolume(settings.sfxVolume, settings.muted)
     inputManager.swapConfirm = settings.swapConfirm
+    inputManager.rumble = settings.rumble
   }, [settings])
   const sounds = theme?.sounds
   useEffect(() => {

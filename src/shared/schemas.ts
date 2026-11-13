@@ -42,7 +42,13 @@ export const ConfigSchema = z.object({
   audio: z
     .object({ sfxVolume: z.number().min(0).max(100).default(70), muted: z.boolean().default(false) })
     .prefault({}),
-  input: z.object({ swapConfirm: z.boolean().default(false) }).prefault({}),
+  input: z
+    .object({
+      swapConfirm: z.boolean().default(false),
+      /** Courte vibration de la manette à chaque validation. */
+      rumble: z.boolean().default(true)
+    })
+    .prefault({}),
   /** Où se trouve chaque émulateur sur cette machine, par identifiant de profil. */
   emulators: z.record(z.string(), z.object({ exePath: z.string().min(1) })).default({})
 })
@@ -197,7 +203,8 @@ export const SettingsPatchSchema = z
     homeBackdrop: z.enum(['hero', 'theme']),
     autoStart: z.boolean(),
     coverAccent: z.boolean(),
-    sortRecent: z.boolean()
+    sortRecent: z.boolean(),
+    rumble: z.boolean()
   })
   .partial()
   .strict()
