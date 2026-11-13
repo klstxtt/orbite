@@ -29,6 +29,10 @@
       {
         "from": "resources/emulators",
         "to": "emulators"
+      },
+      {
+        "from": "resources/native",
+        "to": "native"
       }
     ],
     "directories": {

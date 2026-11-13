@@ -4,12 +4,15 @@
   "exeNames": ["lichii.exe"],
   "ignoreDirs": ["update-old"],
   "args": ["-f", "-g", "{game}"],
-  "gameExtensions": [],
+  "gameExtensions": ["nup", "nsp", "xci"],
   "ready": {
-    "log": { "file": "{emuDir}\\user\\log\\eden_log.txt", "pattern": "Booting game:" },
+    "log": {
+      "file": "{emuDir}\\user\\log\\eden_log.txt",
+      "pattern": "LoadKept: Precompiled fast path|Service\\.NVDRV <|maxwell_3d\\.cpp"
+    },
     "title": "(\\|[^|]+){3,}",
-    "busyText": "Loading Shaders|Launching|Preparing",
-    "settleMs": 1500
+    "progress": "Precompiled pipelines: (\\d+) of (\\d+) done",
+    "settleMs": 2500
   },
   "dialogs": [{ "match": "recommended settings", "answer": "yes" }]
 }

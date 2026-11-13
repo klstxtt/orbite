@@ -100,13 +100,17 @@ export const EmulatorProfileSchema = z.object({
     .array(z.string())
     .default([])
     .transform((list) => list.map((e) => e.trim().replace(/^\./, '').toLowerCase()).filter(Boolean)),
-  /** Comment savoir que le jeu tourne (utilisé à partir de l'étape 3). */
+  /**
+   * Comment savoir que le jeu tourne. `log` : fichier journal (`{emuDir}` accepté) et motif attendu dans
+   * ses nouvelles lignes ; c'est le signal le plus fiable. `title` : motif sur le titre de la fenêtre,
+   * utilisé seul, ou en repli si l'émulateur n'écrit aucun journal. Sans rien : dès que la fenêtre existe.
+   */
   ready: z
     .object({
       log: z.object({ file: z.string().min(1), pattern: regexString }).optional(),
       title: regexString.optional(),
-      /** Texte affiché par l'émulateur tant qu'il charge encore. */
-      busyText: regexString.optional(),
+      /** Avancement lu dans le journal pendant le chargement : groupe 1 = fait, groupe 2 = total. */
+      progress: regexString.optional(),
       settleMs: z.number().min(0).max(60_000).default(1500)
     })
     .prefault({}),

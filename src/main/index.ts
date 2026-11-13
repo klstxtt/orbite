@@ -4,18 +4,26 @@ import { join } from 'path'
 import { pathToFileURL } from 'url'
 import type { GameState } from '../shared/types'
 import { loadProfiles } from './emulators/profiles'
-import { broadcast, registerIpc, type AppContext } from './ipc/register'
+import { broadcast, launchGame, registerIpc, type AppContext } from './ipc/register'
 import { Launcher } from './launch/launcher'
+import { LoadingOverlay } from './launch/overlay'
 import { LibraryService } from './library/service'
+import { createLog } from './log'
 import { mediaPathFromUrl } from './media/cache'
 import { openStores } from './store/stores'
 
-// Variables de développement : fenêtre 1280×720 au lieu du plein écran, capture d'écran puis sortie,
-// et dossier de données à part (pour essayer sans toucher à la vraie bibliothèque).
+// Variables de développement :
+//   CL_WINDOWED=1          fenêtre 1280×720 au lieu du plein écran
+//   CL_DATA_DIR=<dossier>  dossier de données à part (pour essayer sans toucher à la vraie bibliothèque)
+//   CL_CAPTURE=<png>       capture d'écran après CL_CAPTURE_DELAY ms (4000 par défaut), puis sortie
+//   CL_AUTOLAUNCH=<id>     lance ce jeu au démarrage et quitte le lanceur quand il se ferme
+//   CL_AUTOSTOP=<ms>       avec CL_AUTOLAUNCH : arrête le jeu ce délai après qu'il est prêt
 const WINDOWED = process.env.CL_WINDOWED === '1'
 const CAPTURE_TO = process.env.CL_CAPTURE ?? ''
-const DATA_DIR = process.env.CL_DATA_DIR ?? ''
 const CAPTURE_DELAY_MS = Number(process.env.CL_CAPTURE_DELAY) || 4000
+const DATA_DIR = process.env.CL_DATA_DIR ?? ''
+const AUTOLAUNCH = process.env.CL_AUTOLAUNCH ?? ''
+const AUTOSTOP_MS = Number(process.env.CL_AUTOSTOP) || 0
 
 app.setName('Console Launcher')
 // Les sons d'interface doivent pouvoir partir d'une action à la manette, qui n'est pas un « geste » pour Chromium.
@@ -26,7 +34,7 @@ protocol.registerSchemesAsPrivileged([{ scheme: 'media', privileges: { standard:
 let mainWindow: BrowserWindow | null = null
 let gameState: GameState = { status: 'idle' }
 
-function createWindow(fullscreen: boolean): void {
+function createWindow(fullscreen: boolean): BrowserWindow {
   const win = new BrowserWindow({
     width: 1280,
     height: 720,
@@ -47,8 +55,10 @@ function createWindow(fullscreen: boolean): void {
   mainWindow = win
   win.setMenuBarVisibility(false)
   win.once('ready-to-show', () => win.show())
+  // La fenêtre principale fermée, tout s'arrête (l'écran noir de chargement est aussi une fenêtre).
   win.on('closed', () => {
     mainWindow = null
+    app.quit()
   })
 
   // Le rendu ne navigue nulle part et n'ouvre aucune fenêtre.
@@ -69,6 +79,7 @@ function createWindow(fullscreen: boolean): void {
       }, CAPTURE_DELAY_MS)
     })
   }
+  return win
 }
 
 /** Ramène le lanceur au premier plan (fin d'un jeu, seconde instance). */
@@ -82,22 +93,27 @@ function focusLauncher(): void {
 }
 
 function start(): void {
-  const stores = openStores(DATA_DIR || app.getPath('userData'))
-  const builtinProfiles = app.isPackaged
-    ? join(process.resourcesPath, 'emulators')
-    : join(app.getAppPath(), 'resources', 'emulators')
-  const loaded = loadProfiles([builtinProfiles, stores.userEmulatorsDir])
+  const dataDir = DATA_DIR || app.getPath('userData')
+  const stores = openStores(dataDir)
+  const log = createLog(join(dataDir, 'launcher.log'))
+  const resources = app.isPackaged ? process.resourcesPath : join(app.getAppPath(), 'resources')
+  const loaded = loadProfiles([join(resources, 'emulators'), stores.userEmulatorsDir])
   const library = new LibraryService(stores, () => loaded.profiles)
+  const overlay = new LoadingOverlay()
 
   const notices = [stores.config.recovery, stores.library.recovery, stores.stats.recovery, ...loaded.errors].filter(
     (n): n is string => n !== null
   )
+  for (const notice of notices) log(notice)
 
   const launcher = new Launcher({
     onState: (state) => {
       gameState = state
       broadcast(ctx)
-      if (state.status !== 'running') focusLauncher()
+      if (state.status !== 'running') {
+        focusLauncher()
+        if (AUTOLAUNCH) setTimeout(() => app.quit(), 500)
+      }
     },
     onExit: (gameId, seconds) => {
       const profile = stores.config.get().activeProfile
@@ -106,7 +122,15 @@ function start(): void {
         playtime: { ...s.playtime, [key]: (s.playtime[key] ?? 0) + seconds },
         lastPlayed: { ...s.lastPlayed, [gameId]: Date.now() }
       }))
-    }
+    },
+    onReady: () => {
+      if (AUTOSTOP_MS > 0) setTimeout(() => launcher.stop(), AUTOSTOP_MS)
+    },
+    log,
+    showOverlay: (title) => overlay.show(title, mainWindow),
+    setOverlayProgress: (text, ratio) => overlay.setProgress(text, ratio),
+    hideOverlay: () => overlay.hide(),
+    dialogScript: join(resources, 'native', 'answer-dialogs.ps1')
   })
 
   const ctx: AppContext = {
@@ -125,13 +149,24 @@ function start(): void {
   })
 
   registerIpc(ctx)
-  createWindow(!WINDOWED && stores.config.get().fullscreen)
+  const win = createWindow(!WINDOWED && stores.config.get().fullscreen)
 
   // Retour au lanceur depuis un jeu : arrête le jeu en cours.
   globalShortcut.register('Control+Alt+Q', () => {
     if (launcher.isRunning) launcher.stop()
     else focusLauncher()
   })
+
+  if (AUTOLAUNCH) {
+    win.webContents.once('did-finish-load', () => {
+      setTimeout(() => {
+        launchGame(ctx, AUTOLAUNCH).catch((err: unknown) => {
+          log(`lancement automatique impossible : ${err instanceof Error ? err.message : String(err)}`)
+          app.quit()
+        })
+      }, 2500)
+    })
+  }
 }
 
 if (!app.requestSingleInstanceLock()) {

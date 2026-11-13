@@ -14,7 +14,7 @@ import { isIgnoredPath, matchesExeName } from '../emulators/profiles'
 import type { Launcher } from '../launch/launcher'
 import { scanGameFiles, scanPcFolder } from '../library/importer'
 import type { LibraryService } from '../library/service'
-import { mediaUrl, removeArt, storeArt } from '../media/cache'
+import { coverIconPng, mediaUrl, removeArt, storeArt } from '../media/cache'
 import type { Stores } from '../store/stores'
 import { readSystemStatus } from '../system/status'
 
@@ -66,6 +66,19 @@ async function pick(ctx: AppContext, options: OpenDialogOptions): Promise<string
   const win = ctx.window()
   const result = win ? await dialog.showOpenDialog(win, options) : await dialog.showOpenDialog(options)
   return result.canceled ? null : (result.filePaths[0] ?? null)
+}
+
+/** Lance un jeu de la bibliothèque ; lève une erreur lisible si quelque chose manque. */
+export async function launchGame(ctx: AppContext, gameId: string): Promise<void> {
+  const game = ctx.library.find(gameId)
+  const command = ctx.library.command(game)
+  ctx.launcher.launch({
+    gameId,
+    title: game.title,
+    command,
+    profile: game.kind === 'emulated' ? ctx.library.profile(game.emulatorId) : null,
+    iconPng: await coverIconPng(ctx.stores.mediaDir, game.art.cover)
+  })
 }
 
 const NO_INPUT = z.undefined()
@@ -217,9 +230,8 @@ export function registerIpc(ctx: AppContext): void {
     return ok(null)
   })
 
-  handle(IPC.launchGame, IdSchema, (gameId) => {
-    const game = ctx.library.find(gameId)
-    ctx.launcher.launch(gameId, ctx.library.command(game))
+  handle(IPC.launchGame, IdSchema, async (gameId) => {
+    await launchGame(ctx, gameId)
     return ok(null)
   })
   handle(IPC.stopGame, NO_INPUT, () => ctx.launcher.stop())

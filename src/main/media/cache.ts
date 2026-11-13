@@ -26,6 +26,16 @@ export async function storeArt(mediaDir: string, gameId: string, slot: ArtSlot, 
   return name
 }
 
+/** Jaquette en PNG carré de `size` pixels, pour l'icône de la fenêtre du jeu ; null sans jaquette. */
+export async function coverIconPng(mediaDir: string, file: string, size = 256): Promise<Buffer | null> {
+  if (!file) return null
+  try {
+    return await sharp(join(mediaDir, basename(file))).resize(size, size, { fit: 'cover' }).png().toBuffer()
+  } catch {
+    return null
+  }
+}
+
 export function removeArt(mediaDir: string, file: string): void {
   if (!file) return
   rmSync(join(mediaDir, basename(file)), { force: true })
