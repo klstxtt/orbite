@@ -65,6 +65,11 @@ export class LibraryService {
     })
   }
 
+  rename(id: string, title: string): void {
+    this.find(id)
+    this.stores.library.update((lib) => ({ ...lib, games: lib.games.map((g) => (g.id === id ? { ...g, title } : g)) }))
+  }
+
   /** Retire le jeu et renvoie ses fichiers d'images, à supprimer par l'appelant. */
   remove(id: string): string[] {
     const game = this.find(id)

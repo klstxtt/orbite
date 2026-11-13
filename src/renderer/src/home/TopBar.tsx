@@ -55,7 +55,7 @@ export function TopBar({ profiles, activeProfile, focusedProfile, title }: Props
             style={{ background: `linear-gradient(140deg, ${p.color}, color-mix(in srgb, ${p.color} 55%, #000))` }}
             title={p.name}
           >
-            {p.name.slice(0, 1).toUpperCase()}
+            {p.avatar ? <img src={p.avatar} alt="" draggable={false} /> : p.name.slice(0, 1).toUpperCase()}
           </div>
         ))}
       </div>

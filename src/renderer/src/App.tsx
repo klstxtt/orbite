@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react'
 import type { GameView } from '../../shared/types'
 import { api } from './api'
+import { setSfxPreset, setSfxVolume } from './audio/sfx'
 import { Home } from './home/Home'
 import { useAppState } from './hooks/useAppState'
 import { inputManager } from './input/InputManager'
 import { OverlayHost, RunningScreen, type Overlay } from './screens/Overlays'
+import { applyTheme } from './theme/applyTheme'
 import ui from './ui/ui.module.css'
 
 const TOAST_MS = 3200
@@ -49,7 +51,23 @@ export function App(): ReactElement | null {
     if (gameState?.status === 'error') notify(gameState.message)
   }, [gameState, notify])
 
-  if (!state) return null
+  // Thème, sons et disposition de la manette suivent les réglages.
+  const theme = state?.themes.find((t) => t.id === state.activeTheme) ?? state?.themes[0]
+  const settings = state?.settings
+  useEffect(() => {
+    if (theme) applyTheme(theme)
+  }, [theme])
+  useEffect(() => {
+    if (!settings) return
+    setSfxVolume(settings.sfxVolume, settings.muted)
+    inputManager.swapConfirm = settings.swapConfirm
+  }, [settings])
+  const sounds = theme?.sounds
+  useEffect(() => {
+    if (sounds) setSfxPreset(sounds)
+  }, [sounds])
+
+  if (!state || !theme) return null
 
   const launch = (game: GameView): void => {
     void api.launchGame(game.id).then((result) => {
@@ -59,6 +77,9 @@ export function App(): ReactElement | null {
 
   const shortcut = (id: string): void => {
     if (id === 'add') setOverlay({ type: 'add' })
+    else if (id === 'settings') setOverlay({ type: 'settings' })
+    else if (id === 'themes') setOverlay({ type: 'themes' })
+    else if (id === 'power') setOverlay({ type: 'power' })
     else notify('Bientôt disponible.')
   }
 
@@ -70,12 +91,18 @@ export function App(): ReactElement | null {
         games={state.games}
         profiles={state.profiles}
         activeProfileId={state.activeProfile}
+        wallpaper={theme.wallpaperUrl}
+        preferHero={state.settings.homeBackdrop === 'hero'}
         reveal={reveal}
         onLaunch={launch}
         onAdd={() => setOverlay({ type: 'add' })}
         onOptions={(game) => setOverlay({ type: 'options', gameId: game.id })}
         onShortcut={shortcut}
-        notify={notify}
+        onActivateProfile={(profile) => {
+          void api.profileAction({ type: 'activate', id: profile.id }).then((result) => {
+            notify(result.ok ? `Profil actif : ${profile.name}` : result.error)
+          })
+        }}
       />
       {overlay && !running && (
         <OverlayHost

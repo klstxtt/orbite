@@ -16,11 +16,16 @@ import { scanGameFiles, scanPcFolder } from '../library/importer'
 import type { LibraryService } from '../library/service'
 import { coverIconPng, mediaUrl, removeArt, storeArt } from '../media/cache'
 import type { Stores } from '../store/stores'
+import type { ThemeStore } from '../themes/store'
+import { registerSettingsIpc } from './settings'
 import { readSystemStatus } from '../system/status'
 
 export interface AppContext {
   stores: Stores
   library: LibraryService
+  themes: ThemeStore
+  /** Schéma des canaux sans paramètre. */
+  noInput: z.ZodUndefined
   profiles: () => readonly EmulatorProfile[]
   launcher: Launcher
   window: () => BrowserWindow | null
@@ -47,8 +52,25 @@ export function buildState(ctx: AppContext): AppState {
       const exePath = ctx.library.emulatorExe(p.id)
       return { id: p.id, name: p.name, exePath, configured: exePath !== '' && existsSync(exePath) }
     }),
-    profiles: config.profiles,
+    profiles: config.profiles.map((p) => ({ id: p.id, name: p.name, color: p.color, avatar: mediaUrl(p.avatar) })),
     activeProfile: config.activeProfile,
+    settings: {
+      sfxVolume: config.audio.sfxVolume,
+      muted: config.audio.muted,
+      swapConfirm: config.input.swapConfirm,
+      fullscreen: config.fullscreen,
+      homeBackdrop: config.homeBackdrop,
+      autoStart: config.autoStart
+    },
+    themes: ctx.themes.list().map((t) => {
+      const stamp = ctx.themes.wallpaperStamp(t.id)
+      return {
+        ...t,
+        builtin: ctx.themes.isBuiltin(t.id),
+        wallpaperUrl: stamp ? `media://theme/${t.id}/wallpaper.webp?v=${stamp}` : null
+      }
+    }),
+    activeTheme: ctx.themes.exists(config.activeTheme) ? config.activeTheme : 'sombre',
     onboarded: config.onboarded,
     gameState: ctx.gameState(),
     notices: ctx.notices
@@ -62,7 +84,7 @@ export function broadcast(ctx: AppContext): void {
 }
 
 /** Fenêtre de choix de fichier ou de dossier ; null si l'utilisateur annule. */
-async function pick(ctx: AppContext, options: OpenDialogOptions): Promise<string | null> {
+export async function pick(ctx: AppContext, options: OpenDialogOptions): Promise<string | null> {
   const win = ctx.window()
   const result = win ? await dialog.showOpenDialog(win, options) : await dialog.showOpenDialog(options)
   return result.canceled ? null : (result.filePaths[0] ?? null)
@@ -83,16 +105,19 @@ export async function launchGame(ctx: AppContext, gameId: string): Promise<void>
 
 const NO_INPUT = z.undefined()
 
+/** Enregistre un canal dont l'entrée est validée par un schéma. */
+export type Handle = <S extends z.ZodType>(
+  channel: string,
+  schema: S,
+  run: (input: z.infer<S>) => unknown | Promise<unknown>
+) => void
+
 export function registerIpc(ctx: AppContext): void {
   /**
    * Enregistre un canal : l'entrée est validée par `schema` avant tout traitement, et une erreur levée
    * devient un résultat `{ ok: false }` avec son message.
    */
-  const handle = <S extends z.ZodType>(
-    channel: string,
-    schema: S,
-    run: (input: z.infer<S>) => unknown | Promise<unknown>
-  ): void => {
+  const handle: Handle = (channel, schema, run) => {
     ipcMain.handle(channel, async (_event, raw: unknown) => {
       const parsed = schema.safeParse(raw)
       if (!parsed.success) return fail('Requête invalide.')
@@ -235,4 +260,6 @@ export function registerIpc(ctx: AppContext): void {
     return ok(null)
   })
   handle(IPC.stopGame, NO_INPUT, () => ctx.launcher.stop())
+
+  registerSettingsIpc(ctx, handle)
 }

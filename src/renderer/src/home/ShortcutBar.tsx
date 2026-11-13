@@ -15,9 +15,9 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { id: 'library', label: 'Tous les jeux', color: '#3ecf8e', icon: LibraryIcon },
   { id: 'add', label: 'Ajouter un jeu', color: '#ff6b8b', icon: AddIcon },
   { id: 'themes', label: 'Thèmes', color: '#b98bff', icon: ThemeIcon },
-  { id: 'controllers', label: 'Manettes', color: '#d5d9e0', icon: GamepadIcon },
+  { id: 'controllers', label: 'Manettes', color: 'var(--text)', icon: GamepadIcon },
   { id: 'settings', label: 'Paramètres', color: '#f6cf4a', icon: SettingsIcon },
-  { id: 'power', label: 'Mise en veille', color: '#eef0f3', icon: PowerIcon }
+  { id: 'power', label: 'Mise en veille', color: 'var(--text)', icon: PowerIcon }
 ]
 
 interface Props {

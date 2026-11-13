@@ -31,6 +31,11 @@ interface Props {
   games: readonly GameView[]
   profiles: readonly ProfileView[]
   activeProfileId: string
+  /** Fond d'écran du thème, ou null. */
+  wallpaper: string | null
+  /** Vrai : l'image du jeu sélectionné passe avant le fond du thème. */
+  preferHero: boolean
+  onActivateProfile: (profile: ProfileView) => void
   /** Jeu sur lequel amener la sélection (après un ajout) ; `nonce` change à chaque demande. */
   reveal: { id: string; nonce: number } | null
   onLaunch: (game: GameView) => void
@@ -38,10 +43,21 @@ interface Props {
   onOptions: (game: GameView) => void
   /** Raccourci de la barre du bas, par identifiant. */
   onShortcut: (id: string) => void
-  notify: (text: string) => void
 }
 
-export function Home({ games, profiles, activeProfileId, reveal, onLaunch, onAdd, onOptions, onShortcut, notify }: Props): ReactElement {
+export function Home({
+  games,
+  profiles,
+  activeProfileId,
+  wallpaper,
+  preferHero,
+  reveal,
+  onLaunch,
+  onAdd,
+  onOptions,
+  onShortcut,
+  onActivateProfile
+}: Props): ReactElement {
   const [zone, setZone] = useState<Zone>('row')
   const [gameCursor, setGameCursor] = useState(0)
   const [barIndex, setBarIndex] = useState(0)
@@ -115,7 +131,9 @@ export function Home({ games, profiles, activeProfileId, reveal, onLaunch, onAdd
     else if (action === 'down' || action === 'back') leaveTo('row', action)
     else if (action === 'confirm') {
       sfx.confirm()
-      notify('Changement de profil : disponible à l’étape 4.')
+      const profile = profiles[Math.min(profileIndex, profiles.length - 1)]
+      if (profile) onActivateProfile(profile)
+      setZone('row')
     }
   })
 
@@ -125,13 +143,15 @@ export function Home({ games, profiles, activeProfileId, reveal, onLaunch, onAdd
     profiles.findIndex((p) => p.id === activeProfileId)
   )
 
+  const backdrop = (preferHero ? game?.hero : null) ?? wallpaper
+
   return (
-    <div className={s.home}>
-      <Backdrop src={game?.hero ?? null} />
+    <div className={s.home} data-backdrop={backdrop !== null}>
+      <Backdrop src={backdrop} />
       <TopBar
         profiles={profiles}
         activeProfile={activeProfile}
-        focusedProfile={zone === 'profiles' ? profileIndex : -1}
+        focusedProfile={zone === 'profiles' ? Math.min(profileIndex, profiles.length - 1) : -1}
         title={game?.title ?? 'Cartouche vide'}
       />
       <GameRow slots={slots} selected={gameIndex} focused={zone === 'row'} />

@@ -28,6 +28,13 @@ const api: Api = {
   setGameArt: call(IPC.setGameArt),
   removeGame: call(IPC.removeGame),
 
+  renameGame: call(IPC.renameGame),
+
+  updateSettings: call(IPC.updateSettings),
+  profileAction: call(IPC.profileAction),
+  themeAction: call(IPC.themeAction),
+  sleep: call(IPC.sleep),
+
   launchGame: call(IPC.launchGame),
   stopGame: call(IPC.stopGame)
 }

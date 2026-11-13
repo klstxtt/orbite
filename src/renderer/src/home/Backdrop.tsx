@@ -48,7 +48,7 @@ export function Backdrop({ src }: { src: string | null }): ReactElement {
           {layer && <img src={layer} alt="" decoding="async" draggable={false} data-variant={i} />}
         </div>
       ))}
-      <div className={s.backdropShade} />
+      <div className={s.backdropShade} data-on={visible} />
     </div>
   )
 }

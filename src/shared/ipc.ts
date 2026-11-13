@@ -13,6 +13,11 @@ export const IPC = {
   importGames: 'library:import',
   setGameArt: 'library:setArt',
   removeGame: 'library:remove',
+  renameGame: 'library:rename',
+  updateSettings: 'settings:update',
+  profileAction: 'profiles:action',
+  themeAction: 'themes:action',
+  sleep: 'system:sleep',
   launchGame: 'game:launch',
   stopGame: 'game:stop'
 } as const

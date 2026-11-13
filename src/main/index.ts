@@ -9,8 +9,10 @@ import { Launcher } from './launch/launcher'
 import { LoadingOverlay } from './launch/overlay'
 import { LibraryService } from './library/service'
 import { createLog } from './log'
-import { mediaPathFromUrl } from './media/cache'
+import { mediaPathFromUrl, themeIdFromUrl } from './media/cache'
+import { z } from 'zod'
 import { openStores } from './store/stores'
+import { ThemeStore } from './themes/store'
 
 // Variables de développement :
 //   CL_WINDOWED=1          fenêtre 1280×720 au lieu du plein écran
@@ -100,6 +102,7 @@ function start(): void {
   const loaded = loadProfiles([join(resources, 'emulators'), stores.userEmulatorsDir])
   const library = new LibraryService(stores, () => loaded.profiles)
   const overlay = new LoadingOverlay()
+  const themes = new ThemeStore(join(dataDir, 'themes'))
 
   const notices = [stores.config.recovery, stores.library.recovery, stores.stats.recovery, ...loaded.errors].filter(
     (n): n is string => n !== null
@@ -136,6 +139,8 @@ function start(): void {
   const ctx: AppContext = {
     stores,
     library,
+    themes,
+    noInput: z.undefined(),
     profiles: () => loaded.profiles,
     launcher,
     window: () => mainWindow,
@@ -144,7 +149,8 @@ function start(): void {
   }
 
   protocol.handle('media', (request) => {
-    const file = mediaPathFromUrl(stores.mediaDir, request.url)
+    const themeId = themeIdFromUrl(request.url)
+    const file = themeId ? themes.wallpaperPath(themeId) : mediaPathFromUrl(stores.mediaDir, request.url)
     return file ? net.fetch(pathToFileURL(file).toString()) : new Response(null, { status: 404 })
   })
 

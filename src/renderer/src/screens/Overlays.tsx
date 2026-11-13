@@ -1,27 +1,23 @@
 import type { ReactElement } from 'react'
 import type { ScanRequest } from '../../../shared/schemas'
-import type { AppState, GameView, ImportCandidate, Result } from '../../../shared/types'
+import type { AppState, GameView, Result } from '../../../shared/types'
 import { api } from '../api'
 import { sfx } from '../audio/sfx'
 import { useInput } from '../input/useInput'
 import { Menu, type MenuItem } from '../ui/Menu'
+import { TextInput } from '../ui/TextInput'
+import type { HostProps, Overlay } from './overlayTypes'
+import { SettingsHost } from './Settings'
 import s from '../ui/ui.module.css'
 
-/** Ce qui est affiché par-dessus l'accueil. */
-export type Overlay =
-  | { type: 'welcome' }
-  | { type: 'add' }
-  /** Choix de l'émulateur, avant d'ajouter un fichier ou d'importer un dossier. */
-  | { type: 'emulator'; then: 'file' | 'folder' }
-  | { type: 'import'; request: ScanRequest; dir: string; candidates: ImportCandidate[]; checked: ReadonlySet<string> }
-  | { type: 'options'; gameId: string }
-  | { type: 'remove'; gameId: string }
+export type { Overlay } from './overlayTypes'
 
-interface HostProps {
-  overlay: Overlay
+type LibraryOverlay = Extract<Overlay, { type: 'welcome' | 'add' | 'emulator' | 'import' | 'options' | 'remove' }>
+const LIBRARY_TYPES: ReadonlySet<string> = new Set(['welcome', 'add', 'emulator', 'import', 'options', 'remove'])
+const isLibrary = (overlay: Exclude<Overlay, { type: 'text' }>): overlay is LibraryOverlay => LIBRARY_TYPES.has(overlay.type)
+
+interface Props extends HostProps {
   state: AppState
-  open: (overlay: Overlay | null) => void
-  notify: (text: string) => void
   /** Amène la sélection de l'accueil sur ce jeu. */
   reveal: (gameId: string) => void
 }
@@ -40,7 +36,7 @@ export function formatPlaytime(seconds: number): string {
   return hours > 0 ? `${hours} h ${String(minutes).padStart(2, '0')}` : `${minutes} min`
 }
 
-export function OverlayHost({ overlay, state, open, notify, reveal }: HostProps): ReactElement | null {
+export function OverlayHost({ overlay, state, open, notify, reveal }: Props): ReactElement | null {
   /** Affiche l'erreur d'un résultat (sauf annulation) ; renvoie vrai si tout s'est bien passé. */
   const succeeded = <T,>(result: Result<T>): result is { ok: true; value: T } => {
     if (!result.ok && !result.cancelled) notify(result.error)
@@ -90,6 +86,20 @@ export function OverlayHost({ overlay, state, open, notify, reveal }: HostProps)
     else if (id === 'folder-emu') withEmulator('folder')
   }
 
+  if (overlay.type === 'text') {
+    return (
+      <TextInput
+        key={overlay.title}
+        title={overlay.title}
+        initial={overlay.initial}
+        max={overlay.max}
+        onSubmit={overlay.submit}
+        onCancel={() => open(overlay.back)}
+      />
+    )
+  }
+  if (!isLibrary(overlay)) return <SettingsHost overlay={overlay} state={state} open={open} notify={notify} />
+
   switch (overlay.type) {
     case 'welcome': {
       const finish = (): void => {
@@ -98,6 +108,7 @@ export function OverlayHost({ overlay, state, open, notify, reveal }: HostProps)
       }
       return (
         <Menu
+          key="welcome"
           title="Bienvenue"
           subtitle="La bibliothèque est vide. Ajoute un premier jeu : le lanceur démarre tes propres jeux, il n'en contient aucun."
           items={[...ADD_ITEMS, { id: 'later', label: 'Plus tard' }]}
@@ -112,11 +123,12 @@ export function OverlayHost({ overlay, state, open, notify, reveal }: HostProps)
     }
 
     case 'add':
-      return <Menu title="Ajouter un jeu" items={ADD_ITEMS} onBack={() => open(null)} onSelect={chooseAdd} />
+      return <Menu key="add" title="Ajouter un jeu" items={ADD_ITEMS} onBack={() => open(null)} onSelect={chooseAdd} />
 
     case 'emulator':
       return (
         <Menu
+          key="emulator"
           title="Quel émulateur ?"
           items={state.emulators.map((e) => ({ id: e.id, label: e.name, detail: e.configured ? e.exePath : 'à localiser' }))}
           onBack={() => open({ type: 'add' })}
@@ -148,6 +160,7 @@ export function OverlayHost({ overlay, state, open, notify, reveal }: HostProps)
       }
       return (
         <Menu
+          key="import"
           title={`${candidates.length} jeu${candidates.length > 1 ? 'x' : ''} trouvé${candidates.length > 1 ? 's' : ''}`}
           subtitle={overlay.dir}
           items={[
@@ -173,9 +186,11 @@ export function OverlayHost({ overlay, state, open, notify, reveal }: HostProps)
       }
       return (
         <Menu
+          key="options"
           title={game.title}
           subtitle={`Temps de jeu : ${formatPlaytime(game.playtime)}`}
           items={[
+            { id: 'rename', label: 'Renommer…' },
             { id: 'cover', label: 'Changer la jaquette', detail: game.cover ? 'image choisie' : 'aucune' },
             { id: 'hero', label: 'Changer l’image de fond', detail: game.hero ? 'image choisie' : 'aucune' },
             { id: 'remove', label: 'Retirer de la bibliothèque', tone: 'danger' }
@@ -183,7 +198,21 @@ export function OverlayHost({ overlay, state, open, notify, reveal }: HostProps)
           onBack={() => open(null)}
           onSelect={(id) => {
             if (id === 'remove') open({ type: 'remove', gameId: game.id })
-            else void setArt(id === 'cover' ? 'cover' : 'hero')
+            else if (id === 'rename') {
+              open({
+                type: 'text',
+                title: 'Titre du jeu',
+                initial: game.title,
+                max: 120,
+                back: overlay,
+                submit: (title) => {
+                  void api.renameGame({ gameId: game.id, title }).then((result) => {
+                    if (!result.ok && !result.cancelled) notify(result.error)
+                    open({ type: 'options', gameId: game.id })
+                  })
+                }
+              })
+            } else void setArt(id === 'cover' ? 'cover' : 'hero')
           }}
         />
       )
@@ -194,6 +223,7 @@ export function OverlayHost({ overlay, state, open, notify, reveal }: HostProps)
       if (!game) return null
       return (
         <Menu
+          key="remove"
           title={`Retirer « ${game.title} » ?`}
           subtitle="Le jeu disparaît du lanceur. Ses fichiers sur le disque ne sont pas touchés."
           items={[

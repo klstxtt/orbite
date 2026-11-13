@@ -26,6 +26,17 @@ export async function storeArt(mediaDir: string, gameId: string, slot: ArtSlot, 
   return name
 }
 
+/** Image de profil : carré de 256 px en WebP ; renvoie le nom du fichier créé dans `mediaDir`. */
+export async function storeAvatar(mediaDir: string, profileId: string, source: string): Promise<string> {
+  const name = `avatar-${profileId.replace(/[^\w-]/g, '')}-${Date.now().toString(36)}.webp`
+  await sharp(source, { failOn: 'none' })
+    .rotate()
+    .resize(256, 256, { fit: 'cover', position: 'attention' })
+    .webp({ quality: 86 })
+    .toFile(join(mediaDir, name))
+  return name
+}
+
 /** Jaquette en PNG carré de `size` pixels, pour l'icône de la fenêtre du jeu ; null sans jaquette. */
 export async function coverIconPng(mediaDir: string, file: string, size = 256): Promise<Buffer | null> {
   if (!file) return null
@@ -43,6 +54,17 @@ export function removeArt(mediaDir: string, file: string): void {
 
 /** Adresse `media://` d'une image du cache, ou null. */
 export const mediaUrl = (file: string): string | null => (file ? `media://art/${encodeURIComponent(file)}` : null)
+
+/** Identifiant du thème d'une adresse `media://theme/<id>/wallpaper.webp`, ou null. */
+export function themeIdFromUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url)
+    const match = /^\/([a-z0-9][a-z0-9-]{0,39})\/wallpaper\.webp$/.exec(parsed.pathname)
+    return parsed.host === 'theme' && match ? (match[1] ?? null) : null
+  } catch {
+    return null
+  }
+}
 
 /** Chemin sur le disque d'une adresse `media://art/<fichier>` ; le nom est réduit à sa base (pas de `..`). */
 export function mediaPathFromUrl(mediaDir: string, url: string): string | null {

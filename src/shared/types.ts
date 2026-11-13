@@ -1,4 +1,4 @@
-import type { ArtRequest, ImportRequest, ScanRequest } from './schemas'
+import type { ArtRequest, ImportRequest, ProfileAction, RenameGame, ScanRequest, SettingsPatch, Theme, ThemeAction } from './schemas'
 
 /** Un jeu tel que l'accueil l'affiche. */
 export interface GameView {
@@ -21,6 +21,24 @@ export interface ProfileView {
   id: string
   name: string
   color: string
+  /** URL de l'image du profil, ou null. */
+  avatar: string | null
+}
+
+export interface ThemeView extends Theme {
+  /** Thème fourni avec le lanceur : il ne se modifie pas, il se copie. */
+  builtin: boolean
+  /** URL du fond d'écran, ou null. */
+  wallpaperUrl: string | null
+}
+
+export interface SettingsView {
+  sfxVolume: number
+  muted: boolean
+  swapConfirm: boolean
+  fullscreen: boolean
+  homeBackdrop: 'hero' | 'theme'
+  autoStart: boolean
 }
 
 export interface EmulatorView {
@@ -42,6 +60,10 @@ export interface AppState {
   emulators: EmulatorView[]
   profiles: ProfileView[]
   activeProfile: string
+  settings: SettingsView
+  themes: ThemeView[]
+  /** Identifiant du thème actif (toujours présent dans `themes`). */
+  activeTheme: string
   onboarded: boolean
   gameState: GameState
   /** Messages à montrer une fois (fichier de réglages récupéré, profil d'émulateur invalide…). */
@@ -105,6 +127,15 @@ export interface Api {
   importGames(request: ImportRequest): Promise<Result<number>>
   setGameArt(request: ArtRequest): Promise<Result>
   removeGame(gameId: string): Promise<Result>
+
+  renameGame(request: RenameGame): Promise<Result>
+
+  updateSettings(patch: SettingsPatch): Promise<Result>
+  /** Renvoie l'identifiant du profil concerné. */
+  profileAction(action: ProfileAction): Promise<Result<string>>
+  /** Renvoie l'identifiant du thème concerné, ou le dossier d'export. */
+  themeAction(action: ThemeAction): Promise<Result<string>>
+  sleep(): Promise<void>
 
   launchGame(gameId: string): Promise<Result>
   stopGame(): Promise<void>
