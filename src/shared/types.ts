@@ -42,6 +42,7 @@ export interface SettingsView {
   homeBackdrop: 'hero' | 'theme'
   autoStart: boolean
   coverAccent: boolean
+  sortRecent: boolean
 }
 
 export interface EmulatorView {
@@ -71,6 +72,15 @@ export interface AppState {
   gameState: GameState
   /** Messages à montrer une fois (fichier de réglages récupéré, profil d'émulateur invalide…). */
   notices: string[]
+}
+
+/**
+ * Ordre d'affichage : avec `recentFirst`, les jeux déjà lancés passent devant, du plus récent au plus
+ * ancien ; les autres gardent l'ordre d'ajout.
+ */
+export function sortGames<T extends { lastPlayed: number }>(games: readonly T[], recentFirst: boolean): T[] {
+  const list = [...games]
+  return recentFirst ? list.sort((a, b) => b.lastPlayed - a.lastPlayed) : list
 }
 
 export type Result<T = null> = { ok: true; value: T } | { ok: false; error: string; cancelled?: boolean }

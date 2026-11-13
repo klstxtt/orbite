@@ -3,6 +3,7 @@ import { tmpdir } from 'os'
 import { dirname, join } from 'path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { scanGameFiles, scanPcFolder, titleFromPath } from '../src/main/library/importer'
+import { sortGames } from '../src/shared/types'
 
 let root: string
 
@@ -92,5 +93,23 @@ describe('scanGameFiles', () => {
       { title: 'Jeu Deux', path: b },
       { title: 'Jeu Un', path: a }
     ])
+  })
+})
+
+describe('sortGames', () => {
+  const games = [
+    { id: 'a', lastPlayed: 0 },
+    { id: 'b', lastPlayed: 200 },
+    { id: 'c', lastPlayed: 0 },
+    { id: 'd', lastPlayed: 900 }
+  ]
+
+  it('met les jeux joués récemment en premier, les autres dans l’ordre d’ajout', () => {
+    expect(sortGames(games, true).map((g) => g.id)).toEqual(['d', 'b', 'a', 'c'])
+  })
+
+  it('garde l’ordre d’ajout quand le tri est coupé, sans toucher à la liste d’origine', () => {
+    expect(sortGames(games, false).map((g) => g.id)).toEqual(['a', 'b', 'c', 'd'])
+    expect(games[0]?.id).toBe('a')
   })
 })

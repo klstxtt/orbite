@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react'
-import type { GameView } from '../../shared/types'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react'
+import { sortGames, type GameView } from '../../shared/types'
 import { api } from './api'
 import { setSfxPreset, setSfxVolume } from './audio/sfx'
 import { Home } from './home/Home'
@@ -51,6 +51,21 @@ export function App(): ReactElement | null {
     if (gameState?.status === 'error') notify(gameState.message)
   }, [gameState, notify])
 
+  // Au retour d'un jeu, la sélection le suit (il vient peut-être de passer en tête de liste).
+  const runningId = gameState?.status === 'running' ? gameState.id : null
+  const lastRun = useRef<string | null>(null)
+  useEffect(() => {
+    if (runningId) lastRun.current = runningId
+    else if (lastRun.current) {
+      setReveal({ id: lastRun.current, nonce: Date.now() })
+      lastRun.current = null
+    }
+  }, [runningId])
+
+  const rawGames = state?.games
+  const sortRecent = state?.settings.sortRecent ?? true
+  const games = useMemo(() => sortGames(rawGames ?? [], sortRecent), [rawGames, sortRecent])
+
   // Thème, sons et disposition de la manette suivent les réglages.
   const theme = state?.themes.find((t) => t.id === state.activeTheme) ?? state?.themes[0]
   const settings = state?.settings
@@ -88,7 +103,7 @@ export function App(): ReactElement | null {
   return (
     <>
       <Home
-        games={state.games}
+        games={games}
         profiles={state.profiles}
         activeProfileId={state.activeProfile}
         wallpaper={theme.wallpaperUrl}

@@ -85,6 +85,7 @@ export function SettingsHost({ overlay, state, open, notify }: HostProps<Setting
           items={[
             { id: 'fullscreen', label: 'Plein écran', detail: yesNo(settings.fullscreen) },
             { id: 'backdrop', label: 'Fond de l’accueil', detail: settings.homeBackdrop === 'hero' ? 'image du jeu' : 'fond du thème' },
+            { id: 'sort', label: 'Ordre des jeux', detail: settings.sortRecent ? 'joués récemment d’abord' : 'ordre d’ajout' },
             { id: 'accent', label: 'Contour à la couleur de la jaquette', detail: yesNo(settings.coverAccent) },
             { id: 'swap', label: 'Inverser A et B', detail: yesNo(settings.swapConfirm) }
           ]}
@@ -92,6 +93,7 @@ export function SettingsHost({ overlay, state, open, notify }: HostProps<Setting
           onSelect={(id) => {
             if (id === 'fullscreen') set({ fullscreen: !settings.fullscreen })
             else if (id === 'backdrop') set({ homeBackdrop: settings.homeBackdrop === 'hero' ? 'theme' : 'hero' })
+            else if (id === 'sort') set({ sortRecent: !settings.sortRecent })
             else if (id === 'accent') set({ coverAccent: !settings.coverAccent })
             else set({ swapConfirm: !settings.swapConfirm })
           }}

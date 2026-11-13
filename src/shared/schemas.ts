@@ -37,6 +37,8 @@ export const ConfigSchema = z.object({
   autoStart: z.boolean().default(false),
   /** Le contour de sélection prend la couleur de la jaquette du jeu. */
   coverAccent: z.boolean().default(true),
+  /** Les jeux joués récemment passent en premier ; sinon, ordre d'ajout. */
+  sortRecent: z.boolean().default(true),
   audio: z
     .object({ sfxVolume: z.number().min(0).max(100).default(70), muted: z.boolean().default(false) })
     .prefault({}),
@@ -194,7 +196,8 @@ export const SettingsPatchSchema = z
     fullscreen: z.boolean(),
     homeBackdrop: z.enum(['hero', 'theme']),
     autoStart: z.boolean(),
-    coverAccent: z.boolean()
+    coverAccent: z.boolean(),
+    sortRecent: z.boolean()
   })
   .partial()
   .strict()

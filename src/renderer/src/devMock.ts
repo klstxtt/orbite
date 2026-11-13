@@ -18,7 +18,7 @@ export function createBrowserMock(): Api {
       { id: 'p2', name: 'Invité', color: '#e0457b', avatar: null }
     ],
     activeProfile: 'p1',
-    settings: { sfxVolume: 70, muted: false, swapConfirm: false, fullscreen: false, homeBackdrop: 'hero', autoStart: false, coverAccent: true },
+    settings: { sfxVolume: 70, muted: false, swapConfirm: false, fullscreen: false, homeBackdrop: 'hero', autoStart: false, coverAccent: true, sortRecent: true },
     themes: BUILTIN_THEMES.map((t) => ({ ...t, builtin: true, wallpaperUrl: null })),
     activeTheme: 'sombre',
     onboarded: true,
