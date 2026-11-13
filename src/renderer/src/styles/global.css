@@ -1,0 +1,50 @@
+/* Variables de thème : l'étape 4 les remplacera par celles du thème actif. */
+:root {
+  --bg: #17181b;
+  --text: #ffffff;
+  --text-dim: rgba(255, 255, 255, 0.72);
+  --panel: rgba(38, 39, 44, 0.86);
+  --accent-a: #35d0ff;
+  --accent-b: #4f7dff;
+  --accent-c: #a55cff;
+  --select: #e8242c;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  background: #000;
+  color: var(--text);
+  font-family: 'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  cursor: default;
+}
+
+img {
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

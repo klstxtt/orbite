@@ -1,0 +1,509 @@
+/*
+ * Accueil. Toutes les tailles sont en vh : l'écran garde les mêmes proportions à toute résolution.
+ * Seuls `transform` et `opacity` sont animés ou transitionnés.
+ */
+.home {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: radial-gradient(120% 90% at 50% 0%, #2a2c33 0%, var(--bg) 60%);
+  --edge: 4.4vw;
+}
+
+/* ---------- Fond ---------- */
+.backdrop,
+.backdropLayer,
+.backdropShade {
+  position: absolute;
+  inset: 0;
+}
+
+.backdropLayer {
+  opacity: 0;
+  transition: opacity 700ms ease;
+  will-change: opacity;
+}
+
+.backdropLayer[data-on='true'] {
+  opacity: 1;
+}
+
+.backdropLayer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: transform;
+  animation: kenBurnsA 38s ease-in-out infinite alternate;
+}
+
+.backdropLayer img[data-variant='1'] {
+  animation-name: kenBurnsB;
+}
+
+@keyframes kenBurnsA {
+  from {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.13) translate3d(-1.6%, -1.2%, 0);
+  }
+}
+
+@keyframes kenBurnsB {
+  from {
+    transform: scale(1.12) translate3d(1.4%, -1%, 0);
+  }
+  to {
+    transform: scale(1.04) translate3d(0, 0.6%, 0);
+  }
+}
+
+/* Assombrit le bas, la gauche et le haut pour garder le texte lisible. */
+.backdropShade {
+  background:
+    linear-gradient(to top, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.34) 26%, rgba(0, 0, 0, 0) 52%),
+    linear-gradient(to right, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 46%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 24%);
+}
+
+/* ---------- Haut : profils, titre, état ---------- */
+.profiles {
+  position: absolute;
+  left: var(--edge);
+  top: 6.6vh;
+  display: flex;
+  gap: 1.6vh;
+}
+
+.avatar {
+  position: relative;
+  width: 7.2vh;
+  height: 7.2vh;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 3.2vh;
+  font-weight: 700;
+  box-shadow:
+    0 0 0 0.35vh rgba(255, 255, 255, 0.16),
+    0 0.6vh 1.6vh rgba(0, 0, 0, 0.45);
+  transition: transform 180ms var(--ease);
+}
+
+.avatar[data-active='true'] {
+  box-shadow:
+    0 0 0 0.35vh rgba(255, 255, 255, 0.9),
+    0 0.6vh 1.6vh rgba(0, 0, 0, 0.45);
+}
+
+.avatar[data-focused='true'] {
+  transform: scale(1.14);
+  box-shadow:
+    0 0 0 0.45vh var(--accent-a),
+    0 0 2.4vh var(--accent-b);
+}
+
+.title {
+  position: absolute;
+  left: calc(var(--edge) + 0.4vh);
+  top: 17.4vh;
+  margin: 0;
+  font-size: 3.5vh;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-shadow: 0 0.2vh 1.2vh rgba(0, 0, 0, 0.7);
+  animation: titleIn 260ms var(--ease) both;
+}
+
+@keyframes titleIn {
+  from {
+    opacity: 0;
+    transform: translate3d(-1.2vh, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.status {
+  position: absolute;
+  right: var(--edge);
+  top: 7.6vh;
+  display: flex;
+  align-items: center;
+  gap: 2vh;
+  text-shadow: 0 0.2vh 1vh rgba(0, 0, 0, 0.7);
+}
+
+.clock {
+  font-size: 3.7vh;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.statusIcon {
+  width: 3.8vh;
+  height: 3.8vh;
+  filter: drop-shadow(0 0.2vh 0.6vh rgba(0, 0, 0, 0.6));
+}
+
+.statusIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.battery {
+  display: flex;
+  align-items: center;
+  color: #5fe36a;
+}
+
+.battery[data-low='true'] {
+  color: #ff5a4d;
+}
+
+.batteryBody {
+  position: relative;
+  width: 4.6vh;
+  height: 2.4vh;
+  border: 0.3vh solid #fff;
+  border-radius: 0.7vh;
+  padding: 0.25vh;
+  overflow: hidden;
+}
+
+.batteryFill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 0.3vh;
+  background: currentColor;
+  transform-origin: left center;
+}
+
+.batteryBolt {
+  position: absolute;
+  inset: 0.2vh 0;
+  margin: auto;
+  height: 1.7vh;
+  color: #fff;
+  filter: drop-shadow(0 0 0.2vh rgba(0, 0, 0, 0.8));
+}
+
+.batteryCap {
+  width: 0.4vh;
+  height: 1vh;
+  margin-left: 0.15vh;
+  border-radius: 0 0.3vh 0.3vh 0;
+  background: #fff;
+}
+
+/* ---------- Rangée de jeux ---------- */
+.row {
+  position: absolute;
+  left: var(--edge);
+  right: 0;
+  top: 30.6vh;
+  height: 37vh;
+}
+
+.track {
+  position: absolute;
+  inset: 0;
+  transform: translate3d(calc(var(--tx) * 1vh), 0, 0);
+  transition: transform 300ms var(--ease);
+  will-change: transform;
+}
+
+.tile {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 37vh;
+  height: 37vh;
+  transform-origin: 0 100%;
+  transform: translate3d(calc(var(--x) * 1vh), 0, 0) scale(var(--s));
+  transition: transform 300ms var(--ease);
+  will-change: transform;
+}
+
+.face {
+  position: absolute;
+  inset: 0;
+  border-radius: 2.4vh;
+  overflow: hidden;
+  background: #24252a;
+  box-shadow: 0 1.4vh 3.6vh rgba(0, 0, 0, 0.5);
+}
+
+.face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.face[data-empty='true'] {
+  background: rgba(24, 25, 29, 0.62);
+  box-shadow: inset 0 0 0 0.4vh rgba(255, 255, 255, 0.2);
+}
+
+.empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.6vh;
+  color: var(--text-dim);
+  font-size: 2.9vh;
+  font-weight: 500;
+}
+
+.empty svg {
+  width: 9vh;
+  height: 9vh;
+  opacity: 0.8;
+}
+
+/* Contour : un dégradé conique tourne derrière un masque en forme d'anneau. */
+.ring {
+  position: absolute;
+  inset: -1.3vh;
+  padding: 0.65vh;
+  border-radius: 3.7vh;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 220ms ease;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+
+.ring i {
+  position: absolute;
+  inset: -50%;
+  background: conic-gradient(
+    from 0deg,
+    var(--accent-a),
+    var(--accent-b),
+    var(--accent-c),
+    #ff7ad9,
+    var(--accent-c),
+    var(--accent-b),
+    var(--accent-a)
+  );
+  animation: ringSpin 5s linear infinite;
+  animation-play-state: paused;
+}
+
+.glow {
+  position: absolute;
+  inset: -1.3vh;
+  border-radius: 3.7vh;
+  box-shadow:
+    0 0 3vh 0.4vh color-mix(in srgb, var(--accent-b) 75%, transparent),
+    0 0 7vh 1.4vh color-mix(in srgb, var(--accent-c) 45%, transparent);
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.tile[data-selected='true'] .ring {
+  opacity: 0.45;
+}
+
+.tile[data-focused='true'] .ring {
+  opacity: 1;
+}
+
+.tile[data-focused='true'] .ring i {
+  animation-play-state: running;
+}
+
+.tile[data-focused='true'] .glow {
+  animation: glowPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes ringSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ---------- Barre de raccourcis ---------- */
+.bar {
+  --item: 7.6vh;
+  --gap: 0.5vh;
+  position: absolute;
+  left: 50%;
+  bottom: 8.6vh;
+  display: flex;
+  gap: var(--gap);
+  padding: 1vh;
+  border-radius: 99vh;
+  background: var(--panel);
+  box-shadow: 0 1vh 3vh rgba(0, 0, 0, 0.4);
+  transform: translateX(-50%);
+}
+
+.barDot {
+  position: absolute;
+  left: 1vh;
+  top: 1vh;
+  width: var(--item);
+  height: var(--item);
+  border-radius: 50%;
+  background: var(--select);
+  transform: translate3d(calc(var(--i) * (var(--item) + var(--gap))), 0, 0);
+  transition: transform 220ms var(--ease);
+  will-change: transform;
+}
+
+.bar[data-focused='true'] .barDot {
+  box-shadow:
+    0 0 0 0.35vh rgba(255, 255, 255, 0.92),
+    0 0 2.6vh color-mix(in srgb, var(--select) 80%, transparent);
+}
+
+.barItem {
+  position: relative;
+  width: var(--item);
+  height: var(--item);
+  display: grid;
+  place-items: center;
+}
+
+.barItem svg {
+  width: 3.7vh;
+  height: 3.7vh;
+}
+
+.barItem[data-selected='true'] {
+  color: #fff !important;
+}
+
+.barLabel {
+  position: absolute;
+  left: 1vh;
+  bottom: calc(100% + 1.4vh);
+  width: var(--item);
+  display: flex;
+  justify-content: center;
+  white-space: nowrap;
+  font-size: 2.3vh;
+  font-weight: 600;
+  text-shadow: 0 0.2vh 1vh rgba(0, 0, 0, 0.8);
+  opacity: 0;
+  transform: translate3d(calc(var(--i) * (var(--item) + var(--gap))), 0, 0);
+  pointer-events: none;
+}
+
+.bar[data-focused='true'] .barLabel {
+  animation: labelIn 200ms var(--ease) both;
+}
+
+@keyframes labelIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---------- Bas : manette, aides, message ---------- */
+.padState {
+  position: absolute;
+  left: var(--edge);
+  bottom: 3vh;
+  width: 3.8vh;
+  height: 3.8vh;
+  color: #fff;
+  opacity: 0.3;
+  transition: opacity 300ms ease;
+}
+
+.padState[data-on='true'] {
+  opacity: 0.95;
+}
+
+.padState svg {
+  width: 100%;
+  height: 100%;
+}
+
+.hints {
+  position: absolute;
+  right: var(--edge);
+  bottom: 3vh;
+  display: flex;
+  gap: 3.4vh;
+  font-size: 2.7vh;
+  font-weight: 500;
+  text-shadow: 0 0.2vh 1vh rgba(0, 0, 0, 0.8);
+}
+
+.hint {
+  display: flex;
+  align-items: center;
+  gap: 1.2vh;
+}
+
+.hintGlyph {
+  width: 3.4vh;
+  height: 3.4vh;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: #17181b;
+  font-size: 2.1vh;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: 21vh;
+  padding: 1.3vh 2.8vh;
+  border-radius: 99vh;
+  background: rgba(20, 21, 25, 0.92);
+  box-shadow: 0 1vh 3vh rgba(0, 0, 0, 0.45);
+  font-size: 2.4vh;
+  white-space: nowrap;
+  animation: toastIn 2200ms ease both;
+}
+
+@keyframes toastIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(-50%, 1vh, 0);
+  }
+  8%,
+  88% {
+    opacity: 1;
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-50%, 0, 0);
+  }
+}
