@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react'
-import type { GameView } from '../../../shared/types'
+import { useEffect, useMemo, useState, type ReactElement } from 'react'
+import type { GameView, ProfileView } from '../../../shared/types'
 import { sfx } from '../audio/sfx'
-import type { ProfileView } from '../demo/library'
 import { useGamepadConnected } from '../hooks/useSystem'
 import type { Action } from '../input/actions'
 import { useInput } from '../input/useInput'
@@ -17,7 +16,6 @@ type Zone = 'profiles' | 'row' | 'bar'
 
 /** Cases « Cartouche vide » affichées après le dernier jeu. */
 const EMPTY_SLOTS = 3
-const TOAST_MS = 2200
 
 const HINTS: Record<'game' | 'empty' | 'bar' | 'profiles', readonly Hint[]> = {
   game: [
@@ -32,29 +30,40 @@ const HINTS: Record<'game' | 'empty' | 'bar' | 'profiles', readonly Hint[]> = {
 interface Props {
   games: readonly GameView[]
   profiles: readonly ProfileView[]
+  activeProfileId: string
+  /** Jeu sur lequel amener la sélection (après un ajout) ; `nonce` change à chaque demande. */
+  reveal: { id: string; nonce: number } | null
+  onLaunch: (game: GameView) => void
+  onAdd: () => void
+  onOptions: (game: GameView) => void
+  /** Raccourci de la barre du bas, par identifiant. */
+  onShortcut: (id: string) => void
+  notify: (text: string) => void
 }
 
-export function Home({ games, profiles }: Props): ReactElement {
+export function Home({ games, profiles, activeProfileId, reveal, onLaunch, onAdd, onOptions, onShortcut, notify }: Props): ReactElement {
   const [zone, setZone] = useState<Zone>('row')
-  const [gameIndex, setGameIndex] = useState(0)
+  const [gameCursor, setGameCursor] = useState(0)
   const [barIndex, setBarIndex] = useState(0)
   const [profileIndex, setProfileIndex] = useState(0)
-  const [activeProfile, setActiveProfile] = useState(0)
-  const [toast, setToast] = useState<{ id: number; text: string } | null>(null)
   const padConnected = useGamepadConnected()
 
   const slots = useMemo<ReadonlyArray<GameView | null>>(
     () => [...games, ...Array.from({ length: EMPTY_SLOTS }, () => null)],
     [games]
   )
+  // La bibliothèque peut rétrécir (jeu retiré) : le curseur reste dans les bornes.
+  const gameIndex = Math.min(gameCursor, slots.length - 1)
   const game = slots[gameIndex] ?? null
 
-  const notify = useCallback((text: string) => setToast({ id: Date.now(), text }), [])
   useEffect(() => {
-    if (!toast) return
-    const timer = window.setTimeout(() => setToast(null), TOAST_MS)
-    return () => window.clearTimeout(timer)
-  }, [toast])
+    if (!reveal) return
+    const index = games.findIndex((g) => g.id === reveal.id)
+    if (index >= 0) {
+      setGameCursor(index)
+      setZone('row')
+    }
+  }, [reveal, games])
 
   /** Déplace un curseur d'un cran ; au bord, un son sourd et rien ne bouge. */
   const step = (current: number, delta: number, count: number, set: (n: number) => void): void => {
@@ -67,55 +76,54 @@ export function Home({ games, profiles }: Props): ReactElement {
     sfx.move()
   }
 
-  const goTo = (next: Zone): void => {
+  const leaveTo = (next: Zone, action: Action): void => {
     setZone(next)
-    sfx.move()
+    if (action === 'back') sfx.back()
+    else sfx.move()
   }
 
   useInput((action: Action) => {
     const delta = action === 'left' ? -1 : action === 'right' ? 1 : 0
 
     if (zone === 'row') {
-      if (delta) step(gameIndex, delta, slots.length, setGameIndex)
-      else if (action === 'down') goTo('bar')
-      else if (action === 'up') goTo('profiles')
+      if (delta) step(gameIndex, delta, slots.length, setGameCursor)
+      else if (action === 'down') leaveTo('bar', action)
+      else if (action === 'up') leaveTo('profiles', action)
       else if (action === 'confirm') {
         sfx.confirm()
-        notify(game ? `Lancement de « ${game.title} » : disponible à l'étape 2` : 'Ajouter un jeu : disponible à l’étape 2')
+        if (game) onLaunch(game)
+        else onAdd()
       } else if ((action === 'options' || action === 'menu') && game) {
         sfx.confirm()
-        notify(`Options de « ${game.title} » : disponibles à l'étape 5`)
+        onOptions(game)
       }
       return
     }
 
     if (zone === 'bar') {
       if (delta) step(barIndex, delta, SHORTCUTS.length, setBarIndex)
-      else if (action === 'up' || action === 'back') {
-        setZone('row')
-        if (action === 'back') sfx.back()
-        else sfx.move()
-      } else if (action === 'confirm') {
+      else if (action === 'up' || action === 'back') leaveTo('row', action)
+      else if (action === 'confirm') {
         sfx.confirm()
-        notify(`${SHORTCUTS[barIndex]?.label ?? ''} : bientôt disponible`)
+        onShortcut(SHORTCUTS[barIndex]?.id ?? '')
       }
       return
     }
 
     // Zone des profils.
     if (delta) step(profileIndex, delta, profiles.length, setProfileIndex)
-    else if (action === 'down' || action === 'back') {
-      setZone('row')
-      if (action === 'back') sfx.back()
-      else sfx.move()
-    } else if (action === 'confirm') {
+    else if (action === 'down' || action === 'back') leaveTo('row', action)
+    else if (action === 'confirm') {
       sfx.confirm()
-      setActiveProfile(profileIndex)
-      setZone('row')
+      notify('Changement de profil : disponible à l’étape 4.')
     }
   })
 
   const hints = zone === 'bar' ? HINTS.bar : zone === 'profiles' ? HINTS.profiles : game ? HINTS.game : HINTS.empty
+  const activeProfile = Math.max(
+    0,
+    profiles.findIndex((p) => p.id === activeProfileId)
+  )
 
   return (
     <div className={s.home}>
@@ -132,11 +140,6 @@ export function Home({ games, profiles }: Props): ReactElement {
         <GamepadIcon />
       </div>
       <ButtonHints hints={hints} />
-      {toast && (
-        <div key={toast.id} className={s.toast} role="status">
-          {toast.text}
-        </div>
-      )}
     </div>
   )
 }

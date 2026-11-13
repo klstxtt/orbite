@@ -1,5 +1,5 @@
 import { memo, type ReactElement } from 'react'
-import type { ProfileView } from '../demo/library'
+import type { ProfileView } from '../../../shared/types'
 import { useClock, useSystemStatus } from '../hooks/useSystem'
 import { EthernetIcon, WifiIcon } from './icons'
 import s from './home.module.css'

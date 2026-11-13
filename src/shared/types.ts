@@ -1,11 +1,68 @@
+import type { ArtRequest, ImportRequest, ScanRequest } from './schemas'
+
 /** Un jeu tel que l'accueil l'affiche. */
 export interface GameView {
   id: string
   title: string
-  /** URL de la jaquette carrée. */
-  cover: string
-  /** URL de la grande image de fond. */
-  hero: string
+  kind: 'pc' | 'emulated'
+  /** URL de la jaquette carrée, ou null (tuile générée). */
+  cover: string | null
+  /** URL de la grande image de fond, ou null. */
+  hero: string | null
+  /** Faux si le programme ou le fichier du jeu a disparu. */
+  available: boolean
+  /** Dernier lancement (ms), 0 si jamais lancé. */
+  lastPlayed: number
+  /** Secondes jouées par le profil actif. */
+  playtime: number
+}
+
+export interface ProfileView {
+  id: string
+  name: string
+  color: string
+}
+
+export interface EmulatorView {
+  id: string
+  name: string
+  /** L'exécutable est connu et présent. */
+  configured: boolean
+  exePath: string
+}
+
+export type GameState =
+  | { status: 'idle' }
+  | { status: 'running'; id: string }
+  | { status: 'error'; id: string; message: string }
+
+/** Tout ce que le rendu affiche ; renvoyé en entier à chaque changement. */
+export interface AppState {
+  games: GameView[]
+  emulators: EmulatorView[]
+  profiles: ProfileView[]
+  activeProfile: string
+  onboarded: boolean
+  gameState: GameState
+  /** Messages à montrer une fois (fichier de réglages récupéré, profil d'émulateur invalide…). */
+  notices: string[]
+}
+
+export type Result<T = null> = { ok: true; value: T } | { ok: false; error: string; cancelled?: boolean }
+
+export const ok = <T>(value: T): Result<T> => ({ ok: true, value })
+export const fail = (error: string): Result<never> => ({ ok: false, error })
+export const cancelled = (): Result<never> => ({ ok: false, error: '', cancelled: true })
+
+/** Un jeu trouvé dans un dossier par l'import. */
+export interface ImportCandidate {
+  title: string
+  path: string
+}
+
+export interface ScanResult {
+  dir: string
+  candidates: ImportCandidate[]
 }
 
 export interface WifiStatus {
@@ -27,9 +84,28 @@ export interface SystemStatus {
   battery: BatteryStatus | null
 }
 
-/** API exposée au rendu par le preload. */
+/** API exposée au rendu par le preload. Les fenêtres de choix de fichier s'ouvrent côté processus principal. */
 export interface Api {
   systemStatus(): Promise<SystemStatus>
   toggleFullscreen(): Promise<void>
   quit(): Promise<void>
+
+  getState(): Promise<AppState>
+  onState(cb: (state: AppState) => void): () => void
+  setOnboarded(): Promise<void>
+
+  /** Choix d'un .exe ; renvoie l'identifiant du jeu ajouté. */
+  addPcGame(): Promise<Result<string>>
+  /** Choix du fichier de jeu (et de l'émulateur s'il n'est pas encore localisé). */
+  addEmulatedGame(emulatorId: string): Promise<Result<string>>
+  locateEmulator(emulatorId: string): Promise<Result>
+  /** Choix d'un dossier, puis liste des jeux qu'il contient (ceux déjà présents sont écartés). */
+  scanFolder(request: ScanRequest): Promise<Result<ScanResult>>
+  /** Renvoie le nombre de jeux ajoutés. */
+  importGames(request: ImportRequest): Promise<Result<number>>
+  setGameArt(request: ArtRequest): Promise<Result>
+  removeGame(gameId: string): Promise<Result>
+
+  launchGame(gameId: string): Promise<Result>
+  stopGame(): Promise<void>
 }

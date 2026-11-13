@@ -13,6 +13,13 @@ const STEP_VH = SMALL_VH + GAP_VH
 const WINDOW_BEFORE = 2
 const WINDOW_AFTER = 12
 
+/** Teinte stable tirée du titre, pour la tuile d'un jeu sans jaquette. */
+function hueOf(title: string): number {
+  let h = 0
+  for (let i = 0; i < title.length; i++) h = (h * 31 + title.charCodeAt(i)) % 360
+  return h
+}
+
 interface Props {
   /** Les jeux, suivis de cases vides (null). */
   slots: ReadonlyArray<GameView | null>
@@ -45,9 +52,13 @@ export const GameRow = memo(function GameRow({ slots, selected, focused }: Props
               <div className={s.ring}>
                 <i />
               </div>
-              <div className={s.face} data-empty={!game}>
-                {game ? (
+              <div className={s.face} data-empty={!game} data-missing={game ? !game.available : false}>
+                {game?.cover ? (
                   <img src={game.cover} alt="" decoding="async" draggable={false} />
+                ) : game ? (
+                  <div className={s.placeholder} style={{ '--h': hueOf(game.title) } as CSSProperties}>
+                    <span>{game.title}</span>
+                  </div>
                 ) : (
                   <div className={s.empty}>
                     <CartridgeIcon />

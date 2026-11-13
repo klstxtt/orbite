@@ -245,6 +245,34 @@
   object-fit: cover;
 }
 
+/* Jeu sans jaquette : dégradé teinté d'après son titre. */
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 3vh;
+  background:
+    radial-gradient(90% 70% at 70% 20%, hsl(calc(var(--h) + 40) 80% 62% / 0.9), transparent 70%),
+    linear-gradient(150deg, hsl(var(--h) 62% 34%), hsl(calc(var(--h) - 30) 60% 14%));
+  font-size: 4.2vh;
+  font-weight: 700;
+  line-height: 1.12;
+  text-shadow: 0 0.3vh 1.2vh rgba(0, 0, 0, 0.55);
+}
+
+.placeholder span {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Programme ou fichier du jeu introuvable. */
+.face[data-missing='true'] {
+  opacity: 0.45;
+}
+
 .face[data-empty='true'] {
   background: rgba(24, 25, 29, 0.62);
   box-shadow: inset 0 0 0 0.4vh rgba(255, 255, 255, 0.2);
@@ -477,33 +505,4 @@
   font-size: 2.1vh;
   font-weight: 800;
   line-height: 1;
-}
-
-.toast {
-  position: absolute;
-  left: 50%;
-  bottom: 21vh;
-  padding: 1.3vh 2.8vh;
-  border-radius: 99vh;
-  background: rgba(20, 21, 25, 0.92);
-  box-shadow: 0 1vh 3vh rgba(0, 0, 0, 0.45);
-  font-size: 2.4vh;
-  white-space: nowrap;
-  animation: toastIn 2200ms ease both;
-}
-
-@keyframes toastIn {
-  0% {
-    opacity: 0;
-    transform: translate3d(-50%, 1vh, 0);
-  }
-  8%,
-  88% {
-    opacity: 1;
-    transform: translate3d(-50%, 0, 0);
-  }
-  100% {
-    opacity: 0;
-    transform: translate3d(-50%, 0, 0);
-  }
 }

@@ -1,0 +1,15 @@
+{
+  "id": "fritchii",
+  "name": "Fritchii",
+  "exeNames": ["lichii.exe"],
+  "ignoreDirs": ["update-old"],
+  "args": ["-f", "-g", "{game}"],
+  "gameExtensions": [],
+  "ready": {
+    "log": { "file": "{emuDir}\\user\\log\\eden_log.txt", "pattern": "Booting game:" },
+    "title": "(\\|[^|]+){3,}",
+    "busyText": "Loading Shaders|Launching|Preparing",
+    "settleMs": 1500
+  },
+  "dialogs": [{ "match": "recommended settings", "answer": "yes" }]
+}
