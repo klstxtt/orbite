@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react'
 import { sortGames, type GameView } from '../../shared/types'
 import { api } from './api'
-import { setSfxPreset, setSfxVolume } from './audio/sfx'
+import { setSfxPreset, setSfxVolume, sfx } from './audio/sfx'
 import { Home } from './home/Home'
 import { useAppState } from './hooks/useAppState'
 import { inputManager } from './input/InputManager'
@@ -84,8 +84,8 @@ export function App(): ReactElement | null {
   }, [sounds])
 
   if (!state || !theme) return null
-
   const launch = (game: GameView): void => {
+    sfx.launch()
     void api.launchGame(game.id).then((result) => {
       if (!result.ok && !result.cancelled) notify(result.error)
     })

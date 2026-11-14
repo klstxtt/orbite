@@ -51,6 +51,21 @@ export async function coverIconPng(mediaDir: string, file: string, size = 256): 
   }
 }
 
+/** Image du cache réduite en JPEG et donnée en adresse `data:`, pour l'écran de chargement ; null si absente. */
+export async function loadingBackdrop(mediaDir: string, file: string): Promise<string | null> {
+  if (!file) return null
+  try {
+    const jpeg = await sharp(join(mediaDir, basename(file)))
+      .resize({ width: 1600, height: 900, fit: 'inside', withoutEnlargement: true })
+      .flatten({ background: '#000000' })
+      .jpeg({ quality: 74 })
+      .toBuffer()
+    return `data:image/jpeg;base64,${jpeg.toString('base64')}`
+  } catch {
+    return null
+  }
+}
+
 /** Couleur d'accent d'une jaquette du cache (#rrggbb) ; vide si l'image est grise ou illisible. */
 export async function coverAccent(mediaDir: string, file: string): Promise<string> {
   if (!file) return ''

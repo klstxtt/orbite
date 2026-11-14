@@ -20,7 +20,7 @@ import { isIgnoredPath, matchesExeName } from '../emulators/profiles'
 import type { Launcher } from '../launch/launcher'
 import { scanGameFiles, scanPcFolder } from '../library/importer'
 import type { LibraryService } from '../library/service'
-import { coverAccent, coverIconPng, mediaUrl, removeArt, storeArt } from '../media/cache'
+import { coverAccent, coverIconPng, loadingBackdrop, mediaUrl, removeArt, storeArt } from '../media/cache'
 import { downloadImage, listImages, searchGames } from '../media/steamgrid'
 import type { Stores } from '../store/stores'
 import type { ThemeStore } from '../themes/store'
@@ -111,12 +111,16 @@ export async function pick(ctx: AppContext, options: OpenDialogOptions): Promise
 export async function launchGame(ctx: AppContext, gameId: string): Promise<void> {
   const game = ctx.library.find(gameId)
   const command = ctx.library.command(game)
+  const { mediaDir } = ctx.stores
+  const hero = await loadingBackdrop(mediaDir, game.art.hero)
+  const backdrop = hero ?? (await loadingBackdrop(mediaDir, game.art.cover))
   ctx.launcher.launch({
     gameId,
     title: game.title,
     command,
     profile: game.kind === 'emulated' ? ctx.library.profile(game.emulatorId) : null,
-    iconPng: await coverIconPng(ctx.stores.mediaDir, game.art.cover)
+    iconPng: await coverIconPng(mediaDir, game.art.cover),
+    backdrop: backdrop ? { url: backdrop, blur: !hero } : null
   })
 }
 

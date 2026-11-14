@@ -20,6 +20,7 @@ import {
 } from '../native/win32'
 import { startDialogWatcher } from './dialogs'
 import { LogTail } from './logTail'
+import type { OverlayArt } from './overlay'
 import { ReadyDetector, type ReadyRules } from './ready'
 import { trackProcessTree } from './tree'
 
@@ -50,6 +51,8 @@ export interface LaunchRequest {
   profile: EmulatorProfile | null
   /** Jaquette en PNG carré de 256 px pour l'icône de la fenêtre, ou null. */
   iconPng: Buffer | null
+  /** Fond de l'écran de chargement (adresse `data:`), ou null ; `blur` quand c'est la jaquette. */
+  backdrop: { url: string; blur: boolean } | null
 }
 
 export interface LauncherHooks {
@@ -59,8 +62,8 @@ export interface LauncherHooks {
   log(line: string): void
   /** L'écran noir vient d'être retiré : le jeu est affiché. */
   onReady(): void
-  /** Écran noir de chargement. */
-  showOverlay(title: string): void
+  /** Écran de chargement, avec le jeu en fond. */
+  showOverlay(title: string, art: OverlayArt): void
   setOverlayProgress(text: string, ratio: number | null): void
   hideOverlay(): void
   /** Chemin du script qui répond aux boîtes de dialogue. */
@@ -144,7 +147,12 @@ class Session {
     const pid = this.child.pid
     if (pid !== undefined) this.known.add(pid)
     this.hooks.onState({ status: 'running', id: this.request.gameId })
-    this.hooks.showOverlay(this.request.title)
+    const { backdrop, iconPng } = this.request
+    this.hooks.showOverlay(this.request.title, {
+      backdrop: backdrop?.url ?? null,
+      blur: backdrop?.blur ?? false,
+      icon: iconPng ? `data:image/png;base64,${iconPng.toString('base64')}` : null
+    })
     const rules = this.request.profile?.dialogs ?? []
     if (pid !== undefined) {
       this.dialogs = startDialogWatcher(this.hooks.dialogScript, pid, rules, this.hooks.log)

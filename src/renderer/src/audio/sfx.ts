@@ -86,7 +86,70 @@ function play(name: SoundName): void {
   }
 }
 
+/** Bruit blanc très court passé dans un filtre : le « clac » d'une pièce qui s'enclenche. */
+function click(out: { ctx: AudioContext; master: GainNode }, at: number, freq: number, gain: number): void {
+  const { ctx: c } = out
+  const length = Math.floor(c.sampleRate * 0.03)
+  const buffer = c.createBuffer(1, length, c.sampleRate)
+  const data = buffer.getChannelData(0)
+  for (let i = 0; i < length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / length) ** 2
+  const noise = c.createBufferSource()
+  noise.buffer = buffer
+  const filter = c.createBiquadFilter()
+  filter.type = 'bandpass'
+  filter.frequency.value = freq
+  filter.Q.value = 1.4
+  const env = c.createGain()
+  env.gain.value = gain
+  noise.connect(filter).connect(env).connect(out.master)
+  noise.start(at)
+
+  // Petit corps tonal sous le bruit, pour que le clic ne sonne pas « papier ».
+  const osc = c.createOscillator()
+  const body = c.createGain()
+  osc.type = 'sine'
+  osc.frequency.setValueAtTime(freq * 0.7, at)
+  osc.frequency.exponentialRampToValueAtTime(freq * 0.3, at + 0.045)
+  body.gain.setValueAtTime(gain * 0.5, at)
+  body.gain.exponentialRampToValueAtTime(0.0001, at + 0.05)
+  osc.connect(body).connect(out.master)
+  osc.start(at)
+  osc.stop(at + 0.07)
+}
+
+/** Lancement d'un jeu : un clic, puis trois notes qui montent vite et une dernière qui résonne. */
+function launch(): void {
+  if (muted || volume <= 0 || preset === 'muet') return
+  const out = output()
+  if (!out) return
+  out.master.gain.value = volume
+  const t0 = out.ctx.currentTime + 0.01
+  click(out, t0, 3000, 0.45)
+  const type: OscillatorType = preset === 'retro' ? 'square' : 'triangle'
+  const level = preset === 'retro' ? 0.05 : 0.13
+  const notes = [
+    { freq: 659, at: 0.05, dur: 0.09 },
+    { freq: 988, at: 0.12, dur: 0.09 },
+    { freq: 1319, at: 0.19, dur: 0.6 }
+  ]
+  for (const n of notes) {
+    const start = t0 + n.at
+    const osc = out.ctx.createOscillator()
+    const env = out.ctx.createGain()
+    osc.type = type
+    osc.frequency.value = n.freq
+    env.gain.setValueAtTime(0.0001, start)
+    env.gain.exponentialRampToValueAtTime(level, start + 0.01)
+    env.gain.exponentialRampToValueAtTime(0.0001, start + n.dur)
+    osc.connect(env).connect(out.master)
+    osc.start(start)
+    osc.stop(start + n.dur + 0.03)
+  }
+}
+
 export const sfx = {
+  /** Lancement d'un jeu. */
+  launch,
   /** Déplacement du curseur. */
   move: (): void => play('move'),
   /** Validation. */
