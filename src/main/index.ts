@@ -123,7 +123,8 @@ function start(): void {
       const key = `${profile}|${gameId}`
       stores.stats.update((s) => ({
         playtime: { ...s.playtime, [key]: (s.playtime[key] ?? 0) + seconds },
-        lastPlayed: { ...s.lastPlayed, [gameId]: Date.now() }
+        lastPlayed: { ...s.lastPlayed, [gameId]: Date.now() },
+        lastSession: { ...s.lastSession, [gameId]: seconds }
       }))
     },
     onReady: () => {

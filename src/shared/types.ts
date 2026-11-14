@@ -1,4 +1,4 @@
-import type { ArtRequest, ImportRequest, ProfileAction, RenameGame, ScanRequest, SettingsPatch, Theme, ThemeAction } from './schemas'
+import type { ArtRequest, GameArgs, ImportRequest, ProfileAction, RenameGame, ScanRequest, SettingsPatch, Theme, ThemeAction } from './schemas'
 
 /** Un jeu tel que l'accueil l'affiche. */
 export interface GameView {
@@ -17,6 +17,12 @@ export interface GameView {
   lastPlayed: number
   /** Secondes jouées par le profil actif. */
   playtime: number
+  /** Durée de la dernière session, en secondes. */
+  lastSession: number
+  /** « PC », ou le nom de l'émulateur. */
+  platform: string
+  /** Arguments de lancement ajoutés par l'utilisateur, sur une ligne. */
+  args: string
 }
 
 export interface ProfileView {
@@ -143,6 +149,7 @@ export interface Api {
   removeGame(gameId: string): Promise<Result>
 
   renameGame(request: RenameGame): Promise<Result>
+  setGameArgs(request: GameArgs): Promise<Result>
 
   updateSettings(patch: SettingsPatch): Promise<Result>
   /** Renvoie l'identifiant du profil concerné. */

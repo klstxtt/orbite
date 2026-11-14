@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type ReactElement } from 'react'
+import { useState, type CSSProperties, type ReactElement, type ReactNode } from 'react'
 import { sfx } from '../audio/sfx'
 import { useInput } from '../input/useInput'
 import s from './ui.module.css'
@@ -23,6 +23,8 @@ interface Props {
   onBack: () => void
   /** Gauche / droite sur une ligne : règle une valeur (volume…). Absent : ces directions ne font rien. */
   onAdjust?: (id: string, delta: -1 | 1) => void
+  /** Colonne d'illustration à gauche de la liste (fiche de jeu). */
+  aside?: ReactNode
 }
 
 /** Lignes visibles avant que la liste ne défile, et hauteur d'une ligne (vh). */
@@ -33,7 +35,7 @@ const ROW_VH = 8.2
  * Panneau de menu par-dessus l'écran courant, entièrement pilotable à la manette.
  * Tant qu'il est affiché, il reçoit seul les actions (il est au-dessus de la pile d'entrée).
  */
-export function Menu({ title, subtitle, items, onSelect, onBack, onAdjust }: Props): ReactElement {
+export function Menu({ title, subtitle, items, onSelect, onBack, onAdjust, aside }: Props): ReactElement {
   const [cursor, setCursor] = useState(0)
   const selected = Math.min(cursor, Math.max(0, items.length - 1))
   const firstVisible = Math.max(0, Math.min(selected - Math.floor(VISIBLE / 2), items.length - VISIBLE))
@@ -62,7 +64,9 @@ export function Menu({ title, subtitle, items, onSelect, onBack, onAdjust }: Pro
 
   return (
     <div className={s.scrim}>
-      <div className={s.panel}>
+      <div className={s.panel} data-aside={aside !== undefined}>
+        {aside !== undefined && <div className={s.aside}>{aside}</div>}
+        <div className={s.panelMain}>
         <h2 className={s.panelTitle}>{title}</h2>
         {subtitle && <p className={s.panelSubtitle}>{subtitle}</p>}
         <div className={s.listWindow} style={{ height: `${Math.min(items.length, VISIBLE) * ROW_VH}vh` }}>
@@ -84,6 +88,7 @@ export function Menu({ title, subtitle, items, onSelect, onBack, onAdjust }: Pro
           <span>
             <b>B</b> Retour
           </span>
+        </div>
         </div>
       </div>
     </div>

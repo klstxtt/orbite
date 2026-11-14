@@ -58,6 +58,11 @@ export function createBrowserMock(): Api {
       return ok(null)
     },
 
+    setGameArgs: async ({ gameId, args }) => {
+      commit({ ...state, games: state.games.map((g) => (g.id === gameId ? { ...g, args } : g)) })
+      return ok(null)
+    },
+
     updateSettings: async (patch) => {
       commit({ ...state, settings: { ...state.settings, ...patch } })
       return ok(null)

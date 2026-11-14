@@ -2,6 +2,7 @@ import { execFile } from 'child_process'
 import { randomUUID } from 'crypto'
 import { app } from 'electron'
 import {
+  GameArgsSchema,
   ProfileActionSchema,
   RenameGameSchema,
   SettingsPatchSchema,
@@ -9,6 +10,7 @@ import {
   type ProfileAction,
   type ThemeAction
 } from '../../shared/schemas'
+import { splitArgs } from '../../shared/args'
 import { IPC } from '../../shared/ipc'
 import { PROFILE_COLORS } from '../../shared/themes'
 import { cancelled, ok, type Result } from '../../shared/types'
@@ -166,6 +168,12 @@ export function registerSettingsIpc(ctx: AppContext, handle: Handle): void {
 
   handle(IPC.renameGame, RenameGameSchema, ({ gameId, title }) => {
     ctx.library.rename(gameId, title)
+    broadcast(ctx)
+    return ok(null)
+  })
+
+  handle(IPC.setGameArgs, GameArgsSchema, ({ gameId, args }) => {
+    ctx.library.setArgs(gameId, splitArgs(args))
     broadcast(ctx)
     return ok(null)
   })

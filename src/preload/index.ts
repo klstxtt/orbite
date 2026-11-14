@@ -29,6 +29,7 @@ const api: Api = {
   removeGame: call(IPC.removeGame),
 
   renameGame: call(IPC.renameGame),
+  setGameArgs: call(IPC.setGameArgs),
 
   updateSettings: call(IPC.updateSettings),
   profileAction: call(IPC.profileAction),

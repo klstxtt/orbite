@@ -3,7 +3,7 @@ import { sfx } from '../audio/sfx'
 import { useInput } from '../input/useInput'
 import s from './ui.module.css'
 
-const ROWS = ['1234567890', 'azertyuiop', 'qsdfghjklm', "wxcvbn'-. "] as const
+const ROWS = ['1234567890', 'azertyuiop', 'qsdfghjklm', "wxcvbn'-. ", '"=/\\:_+,;@'] as const
 const ACTIONS = ['Maj', 'Espace', 'Effacer', 'OK'] as const
 const COLUMNS = 10
 /** Colonne de la grille → touche de la rangée d'actions (4 touches larges). */

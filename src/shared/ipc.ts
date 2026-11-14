@@ -14,6 +14,7 @@ export const IPC = {
   setGameArt: 'library:setArt',
   removeGame: 'library:remove',
   renameGame: 'library:rename',
+  setGameArgs: 'library:setArgs',
   updateSettings: 'settings:update',
   profileAction: 'profiles:action',
   themeAction: 'themes:action',

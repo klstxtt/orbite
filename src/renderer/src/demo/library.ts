@@ -19,6 +19,9 @@ export const demoGames: GameView[] = DEMO.map((g, i) => ({
   hero: demoHero(g.colors, i + 1),
   accent: g.colors[1],
   available: true,
-  lastPlayed: 0,
-  playtime: 0
+  lastPlayed: i === 2 ? Date.now() - 26 * 3600_000 : 0,
+  playtime: i === 2 ? 5 * 3600 + 720 : 0,
+  lastSession: i === 2 ? 2700 : 0,
+  platform: 'PC',
+  args: ''
 }))

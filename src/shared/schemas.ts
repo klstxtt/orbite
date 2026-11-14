@@ -103,7 +103,9 @@ export const StatsSchema = z.object({
   /** Secondes cumulées, clé `<profil>|<jeu>`. */
   playtime: z.record(z.string(), z.number().min(0)).default({}),
   /** Dernier lancement (ms depuis l'époque), par jeu. */
-  lastPlayed: z.record(z.string(), z.number()).default({})
+  lastPlayed: z.record(z.string(), z.number()).default({}),
+  /** Durée de la dernière session (secondes), par jeu. */
+  lastSession: z.record(z.string(), z.number().min(0)).default({})
 })
 export type Stats = z.infer<typeof StatsSchema>
 
@@ -251,6 +253,9 @@ export type ThemeAction = z.infer<typeof ThemeActionSchema>
 
 export const RenameGameSchema = z.object({ gameId: id, title: name(120) })
 export type RenameGame = z.infer<typeof RenameGameSchema>
+
+export const GameArgsSchema = z.object({ gameId: id, args: z.string().max(400) })
+export type GameArgs = z.infer<typeof GameArgsSchema>
 
 export const ArtRequestSchema = z.object({ gameId: id, slot: z.enum(['cover', 'hero']) })
 export type ArtRequest = z.infer<typeof ArtRequestSchema>

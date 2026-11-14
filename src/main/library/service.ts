@@ -87,6 +87,15 @@ export class LibraryService {
     return previous
   }
 
+  /** Arguments ajoutés par l'utilisateur (après ceux du profil, pour un jeu d'émulateur). */
+  setArgs(id: string, args: string[]): void {
+    this.find(id)
+    this.stores.library.update((lib) => ({
+      ...lib,
+      games: lib.games.map((g) => (g.id !== id ? g : g.kind === 'pc' ? { ...g, args } : { ...g, extraArgs: args }))
+    }))
+  }
+
   setAccent(id: string, accent: string): void {
     this.stores.library.update((lib) => ({
       ...lib,

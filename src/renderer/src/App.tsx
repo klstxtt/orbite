@@ -128,6 +128,7 @@ export function App(): ReactElement | null {
           open={setOverlay}
           notify={notify}
           reveal={(id) => setReveal({ id, nonce: Date.now() })}
+          launch={launch}
         />
       )}
       {running && <RunningScreen game={state.games.find((g) => g.id === running)} />}

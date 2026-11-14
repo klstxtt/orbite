@@ -9,6 +9,7 @@ import {
   ScanRequestSchema,
   type EmulatorProfile
 } from '../../shared/schemas'
+import { joinArgs } from '../../shared/args'
 import { cancelled, fail, ok, type AppState, type GameState, type Result } from '../../shared/types'
 import { isIgnoredPath, matchesExeName } from '../emulators/profiles'
 import type { Launcher } from '../launch/launcher'
@@ -37,6 +38,7 @@ export interface AppContext {
 export function buildState(ctx: AppContext): AppState {
   const config = ctx.stores.config.get()
   const stats = ctx.stores.stats.get()
+  const emulatorNames = new Map(ctx.profiles().map((p) => [p.id, p.name]))
   return {
     games: ctx.library.games().map((g) => ({
       id: g.id,
@@ -47,7 +49,10 @@ export function buildState(ctx: AppContext): AppState {
       accent: g.art.accent || null,
       available: ctx.library.isAvailable(g),
       lastPlayed: stats.lastPlayed[g.id] ?? 0,
-      playtime: stats.playtime[`${config.activeProfile}|${g.id}`] ?? 0
+      playtime: stats.playtime[`${config.activeProfile}|${g.id}`] ?? 0,
+      lastSession: stats.lastSession[g.id] ?? 0,
+      platform: g.kind === 'pc' ? 'PC' : (emulatorNames.get(g.emulatorId) ?? g.emulatorId),
+      args: joinArgs(g.kind === 'pc' ? g.args : g.extraArgs)
     })),
     emulators: ctx.profiles().map((p) => {
       const exePath = ctx.library.emulatorExe(p.id)

@@ -20,6 +20,7 @@ interface Props extends HostProps {
   state: AppState
   /** Amène la sélection de l'accueil sur ce jeu. */
   reveal: (gameId: string) => void
+  launch: (game: GameView) => void
 }
 
 const ADD_ITEMS: readonly MenuItem[] = [
@@ -36,7 +37,36 @@ export function formatPlaytime(seconds: number): string {
   return hours > 0 ? `${hours} h ${String(minutes).padStart(2, '0')}` : `${minutes} min`
 }
 
-export function OverlayHost({ overlay, state, open, notify, reveal }: Props): ReactElement | null {
+const SESSION_DATE = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })
+
+/** Colonne de gauche de la fiche d'un jeu : jaquette et chiffres. */
+function SheetAside({ game }: { game: GameView }): ReactElement {
+  const session =
+    game.lastPlayed > 0
+      ? `${SESSION_DATE.format(game.lastPlayed)}${game.lastSession >= 60 ? ` · ${formatPlaytime(game.lastSession)}` : ''}`
+      : 'jamais'
+  return (
+    <>
+      <div className={s.sheetCover}>{game.cover ? <img src={game.cover} alt="" draggable={false} /> : game.title}</div>
+      <dl className={s.sheetFacts}>
+        <div>
+          <dt>Temps de jeu</dt>
+          <dd>{formatPlaytime(game.playtime)}</dd>
+        </div>
+        <div>
+          <dt>Dernière session</dt>
+          <dd>{session}</dd>
+        </div>
+        <div>
+          <dt>Plateforme</dt>
+          <dd>{game.available ? game.platform : `${game.platform} · fichier introuvable`}</dd>
+        </div>
+      </dl>
+    </>
+  )
+}
+
+export function OverlayHost({ overlay, state, open, notify, reveal, launch }: Props): ReactElement | null {
   /** Affiche l'erreur d'un résultat (sauf annulation) ; renvoie vrai si tout s'est bien passé. */
   const succeeded = <T,>(result: Result<T>): result is { ok: true; value: T } => {
     if (!result.ok && !result.cancelled) notify(result.error)
@@ -188,17 +218,37 @@ export function OverlayHost({ overlay, state, open, notify, reveal }: Props): Re
         <Menu
           key="options"
           title={game.title}
-          subtitle={`Temps de jeu : ${formatPlaytime(game.playtime)}`}
+          aside={<SheetAside game={game} />}
           items={[
+            { id: 'play', label: 'Démarrer' },
             { id: 'rename', label: 'Renommer…' },
             { id: 'cover', label: 'Changer la jaquette', detail: game.cover ? 'image choisie' : 'aucune' },
             { id: 'hero', label: 'Changer l’image de fond', detail: game.hero ? 'image choisie' : 'aucune' },
+            { id: 'args', label: 'Arguments de lancement…', detail: game.args || 'aucun' },
+            ...(game.args ? [{ id: 'noargs', label: 'Effacer les arguments' }] : []),
             { id: 'remove', label: 'Retirer de la bibliothèque', tone: 'danger' }
           ]}
           onBack={() => open(null)}
           onSelect={(id) => {
+            const setArgs = (args: string): Promise<void> =>
+              api.setGameArgs({ gameId: game.id, args }).then((result) => {
+                if (!result.ok && !result.cancelled) notify(result.error)
+              })
             if (id === 'remove') open({ type: 'remove', gameId: game.id })
-            else if (id === 'rename') {
+            else if (id === 'play') {
+              open(null)
+              launch(game)
+            } else if (id === 'noargs') void setArgs('')
+            else if (id === 'args') {
+              open({
+                type: 'text',
+                title: 'Arguments de lancement',
+                initial: game.args,
+                max: 400,
+                back: overlay,
+                submit: (args) => void setArgs(args).then(() => open({ type: 'options', gameId: game.id }))
+              })
+            } else if (id === 'rename') {
               open({
                 type: 'text',
                 title: 'Titre du jeu',
