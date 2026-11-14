@@ -1,13 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 120 120">
+  <!-- Orbite : deux planètes qui tournent l'une autour de l'autre ; leurs traînées forment une voie lactée. -->
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#35d0ff"/>
-      <stop offset="0.5" stop-color="#4f7dff"/>
-      <stop offset="1" stop-color="#a55cff"/>
+    <linearGradient id="pink" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FF4FA3" stop-opacity="0.15"/>
+      <stop offset="1" stop-color="#C13BFF"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22D3EE" stop-opacity="0.15"/>
+      <stop offset="1" stop-color="#3B82F6"/>
     </linearGradient>
   </defs>
-  <rect x="24" y="24" width="464" height="464" rx="112" fill="#12141c"/>
-  <rect x="40" y="40" width="432" height="432" rx="98" fill="none" stroke="url(#g)" stroke-width="22"/>
-  <rect x="150" y="150" width="212" height="212" rx="40" fill="url(#g)"/>
-  <circle cx="256" cy="256" r="46" fill="#12141c"/>
+  <rect width="120" height="120" rx="27" fill="#0B0A1A"/>
+  <circle cx="20" cy="26" r="1.8" fill="#fff" opacity="0.8"/>
+  <circle cx="101" cy="98" r="2" fill="#fff" opacity="0.8"/>
+  <circle cx="100" cy="22" r="1.4" fill="#fff" opacity="0.6"/>
+  <path d="M60 53 Q60.7 59.3 67 60 Q60.7 60.7 60 67 Q59.3 60.7 53 60 Q59.3 59.3 60 53Z" fill="#fff" opacity="0.9"/>
+  <g transform="rotate(-35 60 60)">
+    <path d="M98 60 A38 38 0 0 0 22 60 A31 31 0 0 1 84 60 A7 7 0 0 0 98 60 Z" fill="url(#pink)"/>
+    <circle cx="91" cy="60" r="10" fill="#FF6FB5"/>
+    <circle cx="88" cy="57" r="3.5" fill="#FFD0E6"/>
+    <g transform="rotate(180 60 60)">
+      <path d="M98 60 A38 38 0 0 0 22 60 A31 31 0 0 1 84 60 A7 7 0 0 0 98 60 Z" fill="url(#cyan)"/>
+      <circle cx="91" cy="60" r="10" fill="#38BDF8"/>
+      <circle cx="88" cy="57" r="3.5" fill="#CFF4FF"/>
+    </g>
+  </g>
 </svg>
