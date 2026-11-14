@@ -16,7 +16,7 @@
 
 </div>
 
-Console Launcher démarre **tes propres jeux** : des jeux PC (un programme `.exe`) et des jeux lancés par un émulateur. Il ne contient aucun jeu, firmware, clé ni ROM ; les captures ci-dessous montrent des jeux de démonstration inventés, aux visuels générés.
+Console Launcher démarre **tes propres jeux** : des jeux PC (un programme `.exe`) et des jeux lancés par un émulateur. Il ne contient aucun jeu, firmware, clé ni ROM. La capture ci-dessus et la galerie « Captures » montrent les jeux de démonstration du mode développeur (titres inventés, visuels générés) ; la section « Avec une vraie bibliothèque » montre le lanceur rempli.
 
 Inspiré de [FireXcorn/console-launcher](https://github.com/FireXcorn/console-launcher) (licence MIT) ; le code de ce dépôt est écrit de zéro.
 
@@ -40,6 +40,19 @@ Inspiré de [FireXcorn/console-launcher](https://github.com/FireXcorn/console-la
 | **Paramètres** | **Thèmes** |
 
 <p align="center"><img src="docs/images/theme-minuit.jpg" alt="Accueil avec le thème Minuit" width="700"><br><b>Le thème Minuit</b></p>
+
+## Avec une vraie bibliothèque
+
+Une fois les jeux ajoutés et leurs images choisies, la jaquette du jeu sélectionné prend toute la place en fond d'écran et le contour de sélection prend sa couleur.
+
+<img src="docs/images/reel-pokopia.jpg" alt="Accueil avec une vraie bibliothèque, jeu sélectionné en fond d'écran">
+
+| | |
+| --- | --- |
+| <img src="docs/images/reel-animal-crossing.jpg" alt="Accueil, un autre jeu sélectionné"> | <img src="docs/images/reel-smash.jpg" alt="Accueil, un troisième jeu sélectionné"> |
+| <img src="docs/images/reel-fiche.jpg" alt="Fiche d'un jeu : temps de jeu, dernière session, émulateur"> | Le contour de sélection change de couleur avec chaque jaquette. La fiche du jeu montre le temps de jeu, la dernière session et l'émulateur utilisé. |
+
+<sub>Les jeux, jaquettes et images de fond de cette section appartiennent à leurs éditeurs. Ils ne sont pas fournis avec le lanceur : chaque joueur ajoute ses propres jeux et choisit ses images.</sub>
 
 ## Installation
 

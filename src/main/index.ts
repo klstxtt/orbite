@@ -18,11 +18,15 @@ import { ThemeStore } from './themes/store'
 //   CL_WINDOWED=1          fenêtre 1280×720 au lieu du plein écran
 //   CL_DATA_DIR=<dossier>  dossier de données à part (pour essayer sans toucher à la vraie bibliothèque)
 //   CL_CAPTURE=<png>       capture d'écran après CL_CAPTURE_DELAY ms (4000 par défaut), puis sortie
+//   CL_CAPTURE_KEYS=<a,b>  touches envoyées avant la capture (noms Electron : Right, Down, Enter, Delete…)
+//   CL_WINDOW_SIZE=<LxH>   avec CL_WINDOWED : taille de la fenêtre (1280x720 par défaut)
 //   CL_AUTOLAUNCH=<id>     lance ce jeu au démarrage et quitte le lanceur quand il se ferme
 //   CL_AUTOSTOP=<ms>       avec CL_AUTOLAUNCH : arrête le jeu ce délai après qu'il est prêt
 const WINDOWED = process.env.CL_WINDOWED === '1'
 const CAPTURE_TO = process.env.CL_CAPTURE ?? ''
 const CAPTURE_DELAY_MS = Number(process.env.CL_CAPTURE_DELAY) || 4000
+const CAPTURE_KEYS = (process.env.CL_CAPTURE_KEYS ?? '').split(',').map((k) => k.trim()).filter(Boolean)
+const [WINDOW_W, WINDOW_H] = /^(\d{3,4})x(\d{3,4})$/.exec(process.env.CL_WINDOW_SIZE ?? '')?.slice(1).map(Number) ?? [1280, 720]
 const DATA_DIR = process.env.CL_DATA_DIR ?? ''
 const AUTOLAUNCH = process.env.CL_AUTOLAUNCH ?? ''
 const AUTOSTOP_MS = Number(process.env.CL_AUTOSTOP) || 0
@@ -38,8 +42,8 @@ let gameState: GameState = { status: 'idle' }
 
 function createWindow(fullscreen: boolean): BrowserWindow {
   const win = new BrowserWindow({
-    width: 1280,
-    height: 720,
+    width: WINDOW_W,
+    height: WINDOW_H,
     useContentSize: true,
     fullscreen,
     frame: !fullscreen,
@@ -73,12 +77,22 @@ function createWindow(fullscreen: boolean): BrowserWindow {
 
   if (CAPTURE_TO) {
     win.webContents.once('did-finish-load', () => {
-      setTimeout(() => {
-        void win.webContents.capturePage().then((image) => {
-          writeFileSync(CAPTURE_TO, image.toPNG())
-          app.quit()
-        })
-      }, CAPTURE_DELAY_MS)
+      const KEY_GAP_MS = 350
+      CAPTURE_KEYS.forEach((keyCode, i) => {
+        setTimeout(() => {
+          win.webContents.sendInputEvent({ type: 'keyDown', keyCode })
+          win.webContents.sendInputEvent({ type: 'keyUp', keyCode })
+        }, CAPTURE_DELAY_MS + i * KEY_GAP_MS)
+      })
+      setTimeout(
+        () => {
+          void win.webContents.capturePage().then((image) => {
+            writeFileSync(CAPTURE_TO, image.toPNG())
+            app.quit()
+          })
+        },
+        CAPTURE_DELAY_MS + CAPTURE_KEYS.length * KEY_GAP_MS + (CAPTURE_KEYS.length > 0 ? 1500 : 0)
+      )
     })
   }
   return win
