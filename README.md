@@ -1,8 +1,45 @@
+<div align="center">
+
+<img src="build/icon.png" alt="" width="96">
+
 # Console Launcher
 
-Lanceur de jeux plein écran pour Windows 10 et 11, piloté à la manette, avec un accueil façon console de salon. Il démarre **tes propres jeux** : des jeux PC (un programme `.exe`) et des jeux lancés par un émulateur. Il ne contient aucun jeu, firmware, clé ni ROM.
+**Un accueil façon console de salon pour tes jeux PC et d'émulateur, en plein écran et entièrement à la manette.**
+
+![Windows 10 / 11](https://img.shields.io/badge/Windows-10%20%2F%2011-0078D6?logo=windows&logoColor=white)
+![Electron](https://img.shields.io/badge/Electron-45-47848F?logo=electron&logoColor=white)
+![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
+![Licence MIT](https://img.shields.io/badge/licence-MIT-green)
+
+<img src="docs/images/accueil.jpg" alt="Écran d'accueil : rangée de jaquettes, image du jeu en fond, barre de raccourcis" width="900">
+
+</div>
+
+Console Launcher démarre **tes propres jeux** : des jeux PC (un programme `.exe`) et des jeux lancés par un émulateur. Il ne contient aucun jeu, firmware, clé ni ROM ; les captures ci-dessous montrent des jeux de démonstration inventés, aux visuels générés.
 
 Inspiré de [FireXcorn/console-launcher](https://github.com/FireXcorn/console-launcher) (licence MIT) ; le code de ce dépôt est écrit de zéro.
+
+## Ce qu'il fait
+
+- **Accueil « image du jeu »** : grande image de fond en fondu, rangée de jaquettes avec un contour animé qui prend la couleur de la jaquette, horloge, Wi-Fi et batterie.
+- **Tout à la manette** (ou au clavier) : navigation, sons d'interface, vibration, clavier virtuel pour écrire.
+- **Jeux PC et émulateurs** : un émulateur se décrit par un petit profil JSON. Écran noir pendant le chargement, détection du moment où le jeu est prêt, titre et icône de la fenêtre remplacés par ceux du jeu.
+- **Fiche de chaque jeu** : temps de jeu par profil, dernière session, arguments de lancement, images.
+- **Images en ligne** : jaquettes, fonds et logos depuis [SteamGridDB](https://www.steamgriddb.com) avec ta propre clé, choisis à la manette.
+- **Profils et thèmes** : plusieurs joueurs, cinq thèmes fournis, thèmes personnels avec fond d'écran, importables et exportables.
+- **Aucune édition de fichier obligatoire** : tout se règle depuis l'application.
+
+## Captures
+
+| | |
+| --- | --- |
+| <img src="docs/images/fiche-du-jeu.jpg" alt="Fiche d'un jeu"> | <img src="docs/images/choix-image.jpg" alt="Choix d'une jaquette en ligne à la manette"> |
+| **Fiche du jeu** : temps de jeu, dernière session, options | **Images en ligne** : choisir une jaquette à la manette |
+| <img src="docs/images/parametres.jpg" alt="Menu des paramètres"> | <img src="docs/images/themes.jpg" alt="Choix du thème"> |
+| **Paramètres** | **Thèmes** |
+
+<p align="center"><img src="docs/images/theme-minuit.jpg" alt="Accueil avec le thème Minuit" width="700"><br><b>Le thème Minuit</b></p>
 
 ## Installation
 
