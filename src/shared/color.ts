@@ -73,8 +73,8 @@ export function vividAccent(pixels: Uint8Array, channels: number): string {
   return hslToHex(h, Math.max(0.65, s), 0.58)
 }
 
-/** Les trois couleurs du dégradé de sélection, autour d'une couleur d'accent. */
-export function accentTriple(hex: string): { a: string; b: string; c: string } {
+/** Les couleurs du dégradé de sélection (`d` est la pointe la plus claire), autour d'une couleur d'accent. */
+export function accentTriple(hex: string): { a: string; b: string; c: string; d: string } {
   const [h, s, l] = hexToHsl(hex)
-  return { a: hslToHex(h - 28, s, Math.min(0.72, l + 0.1)), b: hslToHex(h, s, l), c: hslToHex(h + 32, s, l) }
+  return { a: hslToHex(h - 28, s, Math.min(0.72, l + 0.1)), b: hslToHex(h, s, l), c: hslToHex(h + 32, s, l), d: hslToHex(h + 60, s, Math.min(0.75, l + 0.12)) }
 }

@@ -54,7 +54,7 @@ export const GameRow = memo(function GameRow({ slots, selected, focused, coverAc
                 {
                   '--x': x,
                   '--s': isSelected ? 1 : SMALL_SCALE,
-                  ...(accent ? { '--accent-a': accent.a, '--accent-b': accent.b, '--accent-c': accent.c } : {})
+                  ...(accent ? { '--accent-a': accent.a, '--accent-b': accent.b, '--accent-c': accent.c, '--accent-d': accent.d } : {})
                 } as CSSProperties
               }
             >

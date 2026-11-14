@@ -346,7 +346,7 @@
     var(--accent-a),
     var(--accent-b),
     var(--accent-c),
-    #ff7ad9,
+    var(--accent-d, #ff7ad9),
     var(--accent-c),
     var(--accent-b),
     var(--accent-a)
