@@ -10,7 +10,7 @@ let newDir: string
 
 beforeEach(() => {
   root = mkdtempSync(join(tmpdir(), 'cl-migrate-'))
-  oldDir = join(root, 'Console Launcher')
+  oldDir = join(root, 'ancien')
   newDir = join(root, 'Orbite')
   mkdirSync(join(oldDir, 'media'), { recursive: true })
   mkdirSync(join(oldDir, 'Cache'), { recursive: true })

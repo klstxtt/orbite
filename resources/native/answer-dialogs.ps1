@@ -10,7 +10,7 @@ $ErrorActionPreference = 'SilentlyContinue'
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 Add-Type -AssemblyName UIAutomationClient
 Add-Type -AssemblyName UIAutomationTypes
-Add-Type -Namespace ConsoleLauncher -Name Dialogs -MemberDefinition @'
+Add-Type -Namespace Orbite -Name Dialogs -MemberDefinition @'
 public delegate bool EnumProc(IntPtr h, IntPtr l);
 [DllImport("user32.dll")] public static extern bool EnumWindows(EnumProc cb, IntPtr l);
 [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
@@ -56,7 +56,7 @@ $buttons = @{
 $handled = @{}
 
 while (Get-Process -Id $target) {
-  foreach ($h in [ConsoleLauncher.Dialogs]::Find($target)) {
+  foreach ($h in [Orbite.Dialogs]::Find($target)) {
     if ($handled.ContainsKey($h)) { continue }
     $root = [System.Windows.Automation.AutomationElement]::FromHandle($h)
     if (-not $root) { continue }
@@ -79,7 +79,7 @@ while (Get-Process -Id $target) {
         break
       }
       # 2. Repli : bouton Win32 classique de la boite.
-      if (-not $how -and [ConsoleLauncher.Dialogs]::ClickChild($h, $wanted)) { $how = 'bouton Win32' }
+      if (-not $how -and [Orbite.Dialogs]::ClickChild($h, $wanted)) { $how = 'bouton Win32' }
       if ($how) {
         $handled[$h] = $true
         $short = $text.Substring(0, [Math]::Min(90, $text.Length))

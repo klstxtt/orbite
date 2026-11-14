@@ -33,7 +33,7 @@ const AUTOLAUNCH = process.env.CL_AUTOLAUNCH ?? ''
 const AUTOSTOP_MS = Number(process.env.CL_AUTOSTOP) || 0
 
 const APP_NAME = 'Orbite'
-/** Nom d'avant : son dossier de données est repris au premier démarrage. */
+/** Dossier de données des premières versions : repris au premier démarrage. */
 const OLD_APP_NAME = 'Console Launcher'
 
 app.setName(APP_NAME)
@@ -118,7 +118,7 @@ function start(): void {
   const migrated = DATA_DIR ? 0 : migrateDataDir(join(app.getPath('appData'), OLD_APP_NAME), dataDir)
   const stores = openStores(dataDir)
   const log = createLog(join(dataDir, 'launcher.log'))
-  if (migrated > 0) log(`données reprises de « ${OLD_APP_NAME} » (${migrated} éléments)`)
+  if (migrated > 0) log(`données reprises de l'ancien dossier (${migrated} éléments)`)
   const resources = app.isPackaged ? process.resourcesPath : join(app.getAppPath(), 'resources')
   const loaded = loadProfiles([join(resources, 'emulators'), stores.userEmulatorsDir])
   const library = new LibraryService(stores, () => loaded.profiles)

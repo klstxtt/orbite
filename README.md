@@ -18,7 +18,7 @@
 
 Orbite démarre **tes propres jeux** : des jeux PC (un programme `.exe`) et des jeux lancés par un émulateur. Il ne contient aucun jeu, firmware, clé ni ROM. La capture ci-dessus et la galerie « Captures » montrent les jeux de démonstration du mode développeur (titres inventés, visuels générés) ; la section « Avec une vraie bibliothèque » montre le lanceur rempli.
 
-Inspiré de [FireXcorn/console-launcher](https://github.com/FireXcorn/console-launcher) (licence MIT) ; le code de ce dépôt est écrit de zéro.
+Inspiré d'un projet open source de [FireXcorn](https://github.com/FireXcorn) (licence MIT) ; le code de ce dépôt est écrit de zéro.
 
 ## Ce qu'il fait
 
@@ -201,8 +201,6 @@ Tout est dans `%APPDATA%\Orbite\` :
 | `launcher.log` | Le journal du lanceur. |
 
 Chaque fichier JSON a une copie de secours `.bak`. Un fichier illisible est mis de côté sous le nom `.casse-<date>` et le lanceur repart de la copie de secours ou des valeurs par défaut.
-
-Le lanceur s'appelait avant « Console Launcher ». Au premier démarrage d'Orbite, le contenu de `%APPDATA%\Console Launcher\` est copié dans `%APPDATA%\Orbite\` ; l'ancien dossier est laissé tel quel et peut être supprimé ensuite.
 
 ## Dépannage
 
