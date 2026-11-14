@@ -32,12 +32,19 @@ Inspiré de [FireXcorn/console-launcher](https://github.com/FireXcorn/console-la
 
 ## Captures
 
-| | |
-| --- | --- |
-| <img src="docs/images/fiche-du-jeu.jpg" alt="Fiche d'un jeu"> | <img src="docs/images/choix-image.jpg" alt="Choix d'une jaquette en ligne à la manette"> |
-| **Fiche du jeu** : temps de jeu, dernière session, options | **Images en ligne** : choisir une jaquette à la manette |
-| <img src="docs/images/parametres.jpg" alt="Menu des paramètres"> | <img src="docs/images/themes.jpg" alt="Choix du thème"> |
-| **Paramètres** | **Thèmes** |
+<p>
+<img src="docs/images/fiche-du-jeu.jpg" alt="Fiche d'un jeu : temps de jeu, dernière session, options" width="49%">
+<img src="docs/images/choix-image.jpg" alt="Images en ligne : choisir une jaquette à la manette" width="49%">
+</p>
+
+**À gauche**, la fiche d'un jeu (temps de jeu, dernière session, options). **À droite**, le choix d'une jaquette en ligne, à la manette.
+
+<p>
+<img src="docs/images/parametres.jpg" alt="Menu des paramètres" width="49%">
+<img src="docs/images/themes.jpg" alt="Choix du thème" width="49%">
+</p>
+
+**À gauche**, les paramètres. **À droite**, le choix du thème.
 
 <p align="center"><img src="docs/images/theme-minuit.jpg" alt="Accueil avec le thème Minuit" width="700"><br><b>Le thème Minuit</b></p>
 
