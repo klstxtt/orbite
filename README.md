@@ -47,10 +47,14 @@ Une fois les jeux ajoutés et leurs images choisies, la jaquette du jeu sélecti
 
 <img src="docs/images/reel-pokopia.jpg" alt="Accueil avec une vraie bibliothèque, jeu sélectionné en fond d'écran">
 
-| | |
-| --- | --- |
-| <img src="docs/images/reel-animal-crossing.jpg" alt="Accueil, un autre jeu sélectionné"> | <img src="docs/images/reel-smash.jpg" alt="Accueil, un troisième jeu sélectionné"> |
-| <img src="docs/images/reel-fiche.jpg" alt="Fiche d'un jeu : temps de jeu, dernière session, émulateur"> | Le contour de sélection change de couleur avec chaque jaquette. La fiche du jeu montre le temps de jeu, la dernière session et l'émulateur utilisé. |
+<p>
+<img src="docs/images/reel-animal-crossing.jpg" alt="Accueil, un autre jeu sélectionné" width="49%">
+<img src="docs/images/reel-smash.jpg" alt="Accueil, un troisième jeu sélectionné" width="49%">
+</p>
+
+Le contour de sélection change de couleur avec chaque jaquette. La fiche du jeu montre le temps de jeu, la dernière session et l'émulateur utilisé :
+
+<img src="docs/images/reel-fiche.jpg" alt="Fiche d'un jeu : temps de jeu, dernière session, émulateur">
 
 <sub>Les jeux, jaquettes et images de fond de cette section appartiennent à leurs éditeurs. Ils ne sont pas fournis avec le lanceur : chaque joueur ajoute ses propres jeux et choisit ses images.</sub>
 
