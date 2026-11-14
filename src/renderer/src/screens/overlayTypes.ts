@@ -1,5 +1,5 @@
 import type { ScanRequest } from '../../../shared/schemas'
-import type { ImportCandidate } from '../../../shared/types'
+import type { ArtKind, ImportCandidate, OnlineGame, OnlineImage } from '../../../shared/types'
 
 /** Ce qui est affiché par-dessus l'accueil. */
 export type Overlay =
@@ -11,6 +11,12 @@ export type Overlay =
   | { type: 'import'; request: ScanRequest; dir: string; candidates: ImportCandidate[]; checked: ReadonlySet<string> }
   | { type: 'options'; gameId: string }
   | { type: 'remove'; gameId: string }
+  // Images d'un jeu
+  | { type: 'art'; gameId: string }
+  /** Jeux trouvés en ligne ; `kind` dit quoi faire une fois le jeu choisi. */
+  | { type: 'art-match'; gameId: string; kind: ArtKind | 'auto'; results: OnlineGame[] }
+  | { type: 'art-pick'; gameId: string; kind: ArtKind; images: OnlineImage[]; back: Overlay }
+  | { type: 'art-key'; back: Overlay | null }
   // Paramètres
   | { type: 'settings' }
   | { type: 'sound' }

@@ -21,7 +21,10 @@ const yesNo = (value: boolean): string => (value ? 'oui' : 'non')
 const nextOf = <T extends { id: string }>(list: readonly T[], current: string): T =>
   list[(list.findIndex((x) => x.id === current) + 1) % list.length] as T
 
-type SettingsOverlay = Exclude<Overlay, { type: 'welcome' | 'add' | 'emulator' | 'import' | 'options' | 'remove' | 'text' }>
+type SettingsOverlay = Exclude<
+  Overlay,
+  { type: 'welcome' | 'add' | 'emulator' | 'import' | 'options' | 'remove' | 'text' | 'art' | 'art-match' | 'art-pick' | 'art-key' }
+>
 
 /** Écrans des paramètres : profils, thèmes, son, affichage, système. */
 export function SettingsHost({ overlay, state, open, notify }: HostProps<SettingsOverlay> & { state: AppState }): ReactElement | null {
@@ -50,12 +53,13 @@ export function SettingsHost({ overlay, state, open, notify }: HostProps<Setting
             { id: 'themes', label: 'Thèmes', detail: state.themes.find((t) => t.id === state.activeTheme)?.name },
             { id: 'sound', label: 'Son' },
             { id: 'display', label: 'Affichage et manette' },
+            { id: 'art-key', label: 'Images en ligne', detail: settings.onlineArt ? 'clé enregistrée' : 'aucune clé' },
             { id: 'add', label: 'Ajouter un jeu' },
             { id: 'emulators', label: 'Émulateurs', detail: `${state.emulators.length}` },
             { id: 'system', label: 'Système' }
           ]}
           onBack={() => open(null)}
-          onSelect={(id) => open({ type: id } as Overlay)}
+          onSelect={(id) => open(id === 'art-key' ? { type: 'art-key', back: overlay } : ({ type: id } as Overlay))}
         />
       )
 

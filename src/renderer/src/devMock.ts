@@ -1,6 +1,6 @@
 import { BUILTIN_THEMES, PROFILE_COLORS, SCHEME_BASE } from '../../shared/themes'
 import { cancelled, fail, ok, type Api, type AppState, type ThemeView } from '../../shared/types'
-import { demoGames } from './demo/library'
+import { demoGames, demoImages } from './demo/library'
 
 const UNAVAILABLE = fail('Disponible uniquement dans l’application (npm run dev).')
 
@@ -18,7 +18,7 @@ export function createBrowserMock(): Api {
       { id: 'p2', name: 'Invité', color: '#e0457b', avatar: null }
     ],
     activeProfile: 'p1',
-    settings: { sfxVolume: 70, muted: false, swapConfirm: false, fullscreen: false, homeBackdrop: 'hero', autoStart: false, coverAccent: true, sortRecent: true, rumble: true },
+    settings: { sfxVolume: 70, muted: false, swapConfirm: false, fullscreen: false, homeBackdrop: 'hero', autoStart: false, coverAccent: true, sortRecent: true, rumble: true, onlineArt: false },
     themes: BUILTIN_THEMES.map((t) => ({ ...t, builtin: true, wallpaperUrl: null })),
     activeTheme: 'sombre',
     onboarded: true,
@@ -53,6 +53,22 @@ export function createBrowserMock(): Api {
     importGames: async () => UNAVAILABLE,
     setGameArt: async () => UNAVAILABLE,
     removeGame: async () => UNAVAILABLE,
+    setArtKey: async (action) => {
+      commit({ ...state, settings: { ...state.settings, onlineArt: action.type !== 'clear' } })
+      return ok(null)
+    },
+    artSearch: async (term) =>
+      ok([
+        { id: 1, name: term, year: 2024 },
+        { id: 2, name: `${term} II`, year: 2026 },
+        { id: 3, name: `${term} : édition spéciale`, year: null }
+      ]),
+    artList: async ({ kind }) => ok(demoImages(kind)),
+    artApply: async ({ gameId, slot, url }) => {
+      commit({ ...state, games: state.games.map((g) => (g.id === gameId ? { ...g, [slot]: url } : g)) })
+      return ok(null)
+    },
+    artAuto: async () => ok(3),
     renameGame: async ({ gameId, title }) => {
       commit({ ...state, games: state.games.map((g) => (g.id === gameId ? { ...g, title } : g)) })
       return ok(null)

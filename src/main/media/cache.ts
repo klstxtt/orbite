@@ -2,28 +2,31 @@ import { rmSync } from 'fs'
 import { basename, join } from 'path'
 import sharp from 'sharp'
 import { vividAccent } from '../../shared/color'
+import type { ArtKind } from '../../shared/types'
 
 // Sans cache, sharp ne garde pas les fichiers ouverts : l'image d'origine reste déplaçable et supprimable.
 sharp.cache(false)
 
-export type ArtSlot = 'cover' | 'hero'
+export type ArtSlot = ArtKind
 
 const COVER_PX = 640
 const HERO_MAX = { width: 2560, height: 1440 }
+const LOGO_MAX = { width: 1000, height: 500 }
 
 /**
- * Convertit une image choisie par l'utilisateur en WebP à la bonne taille et la range dans `mediaDir`.
- * Une jaquette devient un carré de 640 px ; un fond est réduit à 2560×1440 au plus, sans agrandissement.
+ * Convertit une image (fichier choisi par l'utilisateur, ou image téléchargée en mémoire) en WebP à la bonne taille et la range dans `mediaDir`.
+ * Une jaquette devient un carré de 640 px ; un fond est réduit à 2560×1440 au plus et un logo à
+ * 1000×500 au plus (transparence gardée), sans agrandissement.
  * Le nom change à chaque fois pour que l'affichage ne garde pas l'ancienne image en cache.
  */
-export async function storeArt(mediaDir: string, gameId: string, slot: ArtSlot, source: string): Promise<string> {
+export async function storeArt(mediaDir: string, gameId: string, slot: ArtSlot, source: string | Buffer): Promise<string> {
   const name = `${gameId}-${slot}-${Date.now().toString(36)}.webp`
   const image = sharp(source, { failOn: 'none' }).rotate()
   const sized =
     slot === 'cover'
       ? image.resize(COVER_PX, COVER_PX, { fit: 'cover', position: 'attention' })
-      : image.resize({ ...HERO_MAX, fit: 'inside', withoutEnlargement: true })
-  await sized.webp({ quality: slot === 'cover' ? 84 : 80 }).toFile(join(mediaDir, name))
+      : image.resize({ ...(slot === 'logo' ? LOGO_MAX : HERO_MAX), fit: 'inside', withoutEnlargement: true })
+  await sized.webp({ quality: slot === 'hero' ? 80 : 86 }).toFile(join(mediaDir, name))
   return name
 }
 

@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto'
 import { existsSync } from 'fs'
 import { dirname } from 'path'
 import type { EmulatorProfile, Game } from '../../shared/schemas'
+import type { ArtKind } from '../../shared/types'
 import { buildCommand, type Command } from '../emulators/profiles'
 import type { Stores } from '../store/stores'
 import { titleFromPath } from './importer'
@@ -46,7 +47,7 @@ export class LibraryService {
       exe,
       args: [],
       cwd: '',
-      art: { cover: '', hero: '', accent: '' },
+      art: { cover: '', hero: '', logo: '', accent: '' },
       addedAt: Date.now()
     })
   }
@@ -60,7 +61,7 @@ export class LibraryService {
       emulatorId,
       gameFile,
       extraArgs: [],
-      art: { cover: '', hero: '', accent: '' },
+      art: { cover: '', hero: '', logo: '', accent: '' },
       addedAt: Date.now()
     })
   }
@@ -74,11 +75,11 @@ export class LibraryService {
   remove(id: string): string[] {
     const game = this.find(id)
     this.stores.library.update((lib) => ({ ...lib, games: lib.games.filter((g) => g.id !== id) }))
-    return [game.art.cover, game.art.hero].filter(Boolean)
+    return [game.art.cover, game.art.hero, game.art.logo].filter(Boolean)
   }
 
   /** Change une image ; renvoie l'ancien fichier (ou une chaîne vide). */
-  setArt(id: string, slot: 'cover' | 'hero', file: string): string {
+  setArt(id: string, slot: ArtKind, file: string): string {
     const previous = this.find(id).art[slot]
     this.stores.library.update((lib) => ({
       ...lib,

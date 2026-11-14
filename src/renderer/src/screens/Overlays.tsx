@@ -6,6 +6,7 @@ import { sfx } from '../audio/sfx'
 import { useInput } from '../input/useInput'
 import { Menu, type MenuItem } from '../ui/Menu'
 import { TextInput } from '../ui/TextInput'
+import { ArtHost, isArtOverlay, type ArtOverlay } from './Art'
 import type { HostProps, Overlay } from './overlayTypes'
 import { SettingsHost } from './Settings'
 import s from '../ui/ui.module.css'
@@ -14,7 +15,7 @@ export type { Overlay } from './overlayTypes'
 
 type LibraryOverlay = Extract<Overlay, { type: 'welcome' | 'add' | 'emulator' | 'import' | 'options' | 'remove' }>
 const LIBRARY_TYPES: ReadonlySet<string> = new Set(['welcome', 'add', 'emulator', 'import', 'options', 'remove'])
-const isLibrary = (overlay: Exclude<Overlay, { type: 'text' }>): overlay is LibraryOverlay => LIBRARY_TYPES.has(overlay.type)
+const isLibrary = (overlay: Exclude<Overlay, { type: 'text' } | ArtOverlay>): overlay is LibraryOverlay => LIBRARY_TYPES.has(overlay.type)
 
 interface Props extends HostProps {
   state: AppState
@@ -128,6 +129,7 @@ export function OverlayHost({ overlay, state, open, notify, reveal, launch }: Pr
       />
     )
   }
+  if (isArtOverlay(overlay)) return <ArtHost overlay={overlay} state={state} open={open} notify={notify} />
   if (!isLibrary(overlay)) return <SettingsHost overlay={overlay} state={state} open={open} notify={notify} />
 
   switch (overlay.type) {
@@ -211,9 +213,6 @@ export function OverlayHost({ overlay, state, open, notify, reveal, launch }: Pr
     case 'options': {
       const game = state.games.find((g) => g.id === overlay.gameId)
       if (!game) return null
-      const setArt = async (slot: 'cover' | 'hero'): Promise<void> => {
-        if (succeeded(await api.setGameArt({ gameId: game.id, slot }))) notify('Image enregistrée.')
-      }
       return (
         <Menu
           key="options"
@@ -222,8 +221,7 @@ export function OverlayHost({ overlay, state, open, notify, reveal, launch }: Pr
           items={[
             { id: 'play', label: 'Démarrer' },
             { id: 'rename', label: 'Renommer…' },
-            { id: 'cover', label: 'Changer la jaquette', detail: game.cover ? 'image choisie' : 'aucune' },
-            { id: 'hero', label: 'Changer l’image de fond', detail: game.hero ? 'image choisie' : 'aucune' },
+            { id: 'art', label: 'Images…', detail: `${[game.cover, game.hero, game.logo].filter(Boolean).length} sur 3` },
             { id: 'args', label: 'Arguments de lancement…', detail: game.args || 'aucun' },
             ...(game.args ? [{ id: 'noargs', label: 'Effacer les arguments' }] : []),
             { id: 'remove', label: 'Retirer de la bibliothèque', tone: 'danger' }
@@ -262,7 +260,7 @@ export function OverlayHost({ overlay, state, open, notify, reveal, launch }: Pr
                   })
                 }
               })
-            } else void setArt(id === 'cover' ? 'cover' : 'hero')
+            } else open({ type: 'art', gameId: game.id })
           }}
         />
       )
@@ -306,7 +304,11 @@ export function RunningScreen({ game }: { game: GameView | undefined }): ReactEl
   })
   return (
     <div className={s.running}>
-      <div className={s.runningTitle}>{game?.title ?? 'Jeu en cours'}</div>
+      {game?.logo ? (
+        <img className={s.runningLogo} src={game.logo} alt={game.title} draggable={false} />
+      ) : (
+        <div className={s.runningTitle}>{game?.title ?? 'Jeu en cours'}</div>
+      )}
       <div className={s.runningHint}>En cours… B pour arrêter le jeu · Ctrl+Alt+Q depuis le jeu</div>
     </div>
   )
