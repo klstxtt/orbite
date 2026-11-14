@@ -11,6 +11,7 @@ import { LibraryService } from './library/service'
 import { createLog } from './log'
 import { mediaPathFromUrl, themeIdFromUrl } from './media/cache'
 import { z } from 'zod'
+import { migrateDataDir } from './store/migrate'
 import { openStores } from './store/stores'
 import { ThemeStore } from './themes/store'
 
@@ -31,7 +32,11 @@ const DATA_DIR = process.env.CL_DATA_DIR ?? ''
 const AUTOLAUNCH = process.env.CL_AUTOLAUNCH ?? ''
 const AUTOSTOP_MS = Number(process.env.CL_AUTOSTOP) || 0
 
-app.setName('Console Launcher')
+const APP_NAME = 'Orbite'
+/** Nom d'avant : son dossier de données est repris au premier démarrage. */
+const OLD_APP_NAME = 'Console Launcher'
+
+app.setName(APP_NAME)
 // Les sons d'interface doivent pouvoir partir d'une action à la manette, qui n'est pas un « geste » pour Chromium.
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required')
 // Les images du cache sont servies par media://art/<fichier>.
@@ -50,7 +55,7 @@ function createWindow(fullscreen: boolean): BrowserWindow {
     autoHideMenuBar: true,
     backgroundColor: '#000000',
     show: false,
-    title: 'Console Launcher',
+    title: APP_NAME,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
@@ -110,8 +115,10 @@ function focusLauncher(): void {
 
 function start(): void {
   const dataDir = DATA_DIR || app.getPath('userData')
+  const migrated = DATA_DIR ? 0 : migrateDataDir(join(app.getPath('appData'), OLD_APP_NAME), dataDir)
   const stores = openStores(dataDir)
   const log = createLog(join(dataDir, 'launcher.log'))
+  if (migrated > 0) log(`données reprises de « ${OLD_APP_NAME} » (${migrated} éléments)`)
   const resources = app.isPackaged ? process.resourcesPath : join(app.getAppPath(), 'resources')
   const loaded = loadProfiles([join(resources, 'emulators'), stores.userEmulatorsDir])
   const library = new LibraryService(stores, () => loaded.profiles)
@@ -145,7 +152,7 @@ function start(): void {
       if (AUTOSTOP_MS > 0) setTimeout(() => launcher.stop(), AUTOSTOP_MS)
     },
     log,
-    showOverlay: (title) => overlay.show(title, mainWindow),
+    showOverlay: (title, art) => overlay.show(title, art, mainWindow),
     setOverlayProgress: (text, ratio) => overlay.setProgress(text, ratio),
     hideOverlay: () => overlay.hide(),
     dialogScript: join(resources, 'native', 'answer-dialogs.ps1')

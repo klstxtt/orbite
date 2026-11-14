@@ -1,5 +1,5 @@
 {
-  "name": "console-launcher",
+  "name": "orbite",
   "version": "0.1.0",
   "description": "Lanceur de jeux plein écran façon console, piloté à la manette",
   "license": "MIT",
@@ -15,8 +15,8 @@
     "dist": "electron-vite build && electron-builder --win dir"
   },
   "build": {
-    "appId": "local.console.launcher",
-    "productName": "Console Launcher",
+    "appId": "local.orbite",
+    "productName": "Orbite",
     "files": [
       "out/**/*"
     ],

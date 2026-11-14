@@ -2,7 +2,7 @@
 
 <img src="build/icon.png" alt="" width="96">
 
-# Console Launcher
+# Orbite
 
 **Un accueil façon console de salon pour tes jeux PC et d'émulateur, en plein écran et entièrement à la manette.**
 
@@ -16,7 +16,7 @@
 
 </div>
 
-Console Launcher démarre **tes propres jeux** : des jeux PC (un programme `.exe`) et des jeux lancés par un émulateur. Il ne contient aucun jeu, firmware, clé ni ROM. La capture ci-dessus et la galerie « Captures » montrent les jeux de démonstration du mode développeur (titres inventés, visuels générés) ; la section « Avec une vraie bibliothèque » montre le lanceur rempli.
+Orbite démarre **tes propres jeux** : des jeux PC (un programme `.exe`) et des jeux lancés par un émulateur. Il ne contient aucun jeu, firmware, clé ni ROM. La capture ci-dessus et la galerie « Captures » montrent les jeux de démonstration du mode développeur (titres inventés, visuels générés) ; la section « Avec une vraie bibliothèque » montre le lanceur rempli.
 
 Inspiré de [FireXcorn/console-launcher](https://github.com/FireXcorn/console-launcher) (licence MIT) ; le code de ce dépôt est écrit de zéro.
 
@@ -88,11 +88,11 @@ Ensuite, au choix :
 | Commande | Effet |
 | --- | --- |
 | `npm run dev` | Lance l'application en mode développement. |
-| `npm run dist` | Construit `dist/win-unpacked/Console Launcher.exe` (pas d'installateur). |
+| `npm run dist` | Construit `dist/win-unpacked/Orbite.exe` (pas d'installateur). |
 | `npm run typecheck` | Vérifie les types TypeScript. |
 | `npm test` | Lance les tests. |
 
-Pour utiliser le lanceur au quotidien, construis-le avec `npm run dist`, puis lance `Console Launcher.exe`. Le dossier `dist/win-unpacked` se copie tel quel où tu veux.
+Pour utiliser le lanceur au quotidien, construis-le avec `npm run dist`, puis lance `Orbite.exe`. Le dossier `dist/win-unpacked` se copie tel quel où tu veux.
 
 ## Ajouter un jeu
 
@@ -123,7 +123,7 @@ La clé est vérifiée, puis enregistrée seulement sur ton PC, dans `config.jso
 
 ## Ajouter un émulateur
 
-Un émulateur est décrit par un petit fichier JSON, un « profil ». Le profil de Fritchii est fourni. Pour un autre émulateur, crée un fichier dans `%APPDATA%\Console Launcher\emulators\` ; il est lu au démarrage. Un profil qui porte le même `id` qu'un profil fourni le remplace.
+Un émulateur est décrit par un petit fichier JSON, un « profil ». Le profil de Fritchii est fourni. Pour un autre émulateur, crée un fichier dans `%APPDATA%\Orbite\emulators\` ; il est lu au démarrage. Un profil qui porte le même `id` qu'un profil fourni le remplace.
 
 Exemple, le profil de Fritchii (`resources/emulators/fritchii.json`) :
 
@@ -188,7 +188,7 @@ Dans Paramètres > Affichage et manette, « Inverser A et B » échange valider 
 
 ## Où sont mes données
 
-Tout est dans `%APPDATA%\Console Launcher\` :
+Tout est dans `%APPDATA%\Orbite\` :
 
 | Fichier ou dossier | Contenu |
 | --- | --- |
@@ -202,11 +202,13 @@ Tout est dans `%APPDATA%\Console Launcher\` :
 
 Chaque fichier JSON a une copie de secours `.bak`. Un fichier illisible est mis de côté sous le nom `.casse-<date>` et le lanceur repart de la copie de secours ou des valeurs par défaut.
 
+Le lanceur s'appelait avant « Console Launcher ». Au premier démarrage d'Orbite, le contenu de `%APPDATA%\Console Launcher\` est copié dans `%APPDATA%\Orbite\` ; l'ancien dossier est laissé tel quel et peut être supprimé ensuite.
+
 ## Dépannage
 
 **L'application ne démarre pas après `npm install`.** Lance les deux commandes de la section Installation (`npm rebuild koffi` et `node node_modules/electron/install.js`).
 
-**Le jeu reste sur l'écran noir.** Maintiens B une seconde pour voir la fenêtre de l'émulateur : elle attend peut-être une réponse. Si le jeu tourne déjà, le motif `ready.log` du profil ne correspond pas au journal de ta version de l'émulateur. Regarde `launcher.log` et le journal de l'émulateur, puis ajuste le motif dans une copie du profil placée dans `%APPDATA%\Console Launcher\emulators\`.
+**Le jeu reste sur l'écran noir.** Maintiens B une seconde pour voir la fenêtre de l'émulateur : elle attend peut-être une réponse. Si le jeu tourne déjà, le motif `ready.log` du profil ne correspond pas au journal de ta version de l'émulateur. Regarde `launcher.log` et le journal de l'émulateur, puis ajuste le motif dans une copie du profil placée dans `%APPDATA%\Orbite\emulators\`.
 
 **Le premier lancement d'un jeu est très long.** L'émulateur prépare ses shaders. La barre de progression avance tant qu'il travaille ; les lancements suivants sont rapides.
 
