@@ -7,6 +7,7 @@ import {
   createIconFromPng,
   destroyIcon,
   focusWindow,
+  foregroundPid,
   listProcesses,
   listWindows,
   nativeAvailable,
@@ -38,6 +39,8 @@ const MIN_WINDOW = { width: 200, height: 150 }
 const ICON_PX = 256
 /** Sans profil d'émulateur : le jeu est prêt peu après l'apparition de sa fenêtre. */
 const PC_SETTLE_MS = 800
+/** Après l'affichage du jeu, le lanceur veille ce temps-là à ce que le jeu reste au premier plan. */
+const KEEP_FOCUS_MS = 10_000
 
 export interface LaunchRequest {
   gameId: string
@@ -108,6 +111,8 @@ class Session {
   private revealHeldSince: number | null = null
   private dialogs: ChildProcess | null = null
   private lastProgress = ''
+  private readyAt = 0
+  private focusLogged = false
 
   constructor(
     private readonly request: LaunchRequest,
@@ -206,7 +211,22 @@ class Session {
       }
     }
 
+    this.keepFocus(now, main)
     this.readPad(now, main)
+  }
+
+  /**
+   * Juste après l'affichage, si une autre fenêtre (le lanceur, la barre des tâches) a gardé le premier
+   * plan, il est rendu au jeu : sinon un jeu « plein écran sans bordure » reste sous la barre des tâches.
+   * Passé ce délai, le joueur est libre de changer de fenêtre.
+   */
+  private keepFocus(now: number, main: WindowInfo | null): void {
+    if (!this.ready || !main || now - this.readyAt > KEEP_FOCUS_MS || this.alive.has(foregroundPid())) return
+    const ok = focusWindow(main.hwnd)
+    if (!this.focusLogged) {
+      this.focusLogged = true
+      this.hooks.log(ok ? 'premier plan rendu au jeu' : 'Windows refuse le premier plan au jeu')
+    }
   }
 
   private readPad(now: number, main: WindowInfo | null): void {
@@ -231,6 +251,7 @@ class Session {
   private reveal(reason: string, main: WindowInfo | null): void {
     if (this.ready) return
     this.ready = true
+    this.readyAt = Date.now()
     this.hooks.log(`jeu prêt (${reason}) après ${Math.round((Date.now() - this.started) / 1000)} s`)
     this.hooks.hideOverlay()
     this.dialogs?.kill()

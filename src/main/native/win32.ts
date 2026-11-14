@@ -37,6 +37,8 @@ const WM_SETICON = 0x0080
 const SMTO_ABORTIFHUNG = 0x2
 const MESSAGE_TIMEOUT_MS = 200
 const ICON_VERSION = 0x00030000
+const VK_MENU = 0x12
+const KEYEVENTF_KEYUP = 0x2
 
 type Fn = (...args: never[]) => unknown
 interface Bindings {
@@ -56,6 +58,8 @@ interface Bindings {
   sendValue: (hwnd: number, msg: number, w: number, l: number, flags: number, timeout: number, out: number[]) => number
   postMessage: (hwnd: number, msg: number, w: number, l: number) => boolean
   setForeground: (hwnd: number) => boolean
+  getForeground: () => number
+  keybd: (vk: number, scan: number, flags: number, extra: number) => void
   createIcon: (bits: Buffer, size: number, icon: boolean, version: number, cx: number, cy: number, flags: number) => number
   destroyIcon: (icon: number) => boolean
   padState: ((index: number, out: { Gamepad?: { wButtons?: number } }) => number) | null
@@ -126,6 +130,8 @@ function bindings(): Bindings | null {
       ),
       postMessage: fn(user32, 'bool PostMessageW(intptr_t hwnd, uint32_t msg, uintptr_t w, intptr_t l)'),
       setForeground: fn(user32, 'bool SetForegroundWindow(intptr_t hwnd)'),
+      getForeground: fn(user32, 'intptr_t GetForegroundWindow()'),
+      keybd: fn(user32, 'void keybd_event(uint8_t vk, uint8_t scan, uint32_t flags, uintptr_t extra)'),
       createIcon: fn(
         user32,
         'intptr_t CreateIconFromResourceEx(const uint8_t *bits, uint32_t size, bool icon, uint32_t version, int cx, int cy, uint32_t flags)'
@@ -215,8 +221,31 @@ export function destroyIcon(icon: number): void {
   if (icon !== 0) bindings()?.destroyIcon(icon)
 }
 
-export function focusWindow(hwnd: number): void {
-  bindings()?.setForeground(hwnd)
+/**
+ * Met une fenêtre au premier plan ; renvoie vrai si elle y est.
+ * Windows refuse le premier plan à un programme qui n'a pas reçu d'entrée récemment (le lanceur, quand
+ * le joueur utilise la manette) : un appui simulé sur Alt lève ce verrou. Sans premier plan, une fenêtre
+ * « plein écran sans bordure » laisse la barre des tâches visible par-dessus le jeu.
+ */
+export function focusWindow(hwnd: number): boolean {
+  const b = bindings()
+  if (!b) return false
+  if (b.getForeground() === hwnd) return true
+  b.keybd(VK_MENU, 0, 0, 0)
+  b.setForeground(hwnd)
+  b.keybd(VK_MENU, 0, KEYEVENTF_KEYUP, 0)
+  return b.getForeground() === hwnd
+}
+
+/** Processus de la fenêtre au premier plan (0 si inconnu). */
+export function foregroundPid(): number {
+  const b = bindings()
+  if (!b) return 0
+  const hwnd = b.getForeground()
+  if (hwnd === 0) return 0
+  const out = [0]
+  b.windowPid(hwnd, out)
+  return out[0] ?? 0
 }
 
 /** Demande poliment la fermeture d'une fenêtre (comme un clic sur la croix). */
