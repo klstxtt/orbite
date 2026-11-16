@@ -13,8 +13,8 @@ import s from '../ui/ui.module.css'
 
 export type { Overlay } from './overlayTypes'
 
-type LibraryOverlay = Extract<Overlay, { type: 'welcome' | 'add' | 'emulator' | 'import' | 'options' | 'remove' }>
-const LIBRARY_TYPES: ReadonlySet<string> = new Set(['welcome', 'add', 'emulator', 'import', 'options', 'remove'])
+type LibraryOverlay = Extract<Overlay, { type: 'welcome' | 'add' | 'emulator' | 'emu-locate' | 'import' | 'options' | 'remove' }>
+const LIBRARY_TYPES: ReadonlySet<string> = new Set(['welcome', 'add', 'emulator', 'emu-locate', 'import', 'options', 'remove'])
 const isLibrary = (overlay: Exclude<Overlay, { type: 'text' } | ArtOverlay>): overlay is LibraryOverlay => LIBRARY_TYPES.has(overlay.type)
 
 interface Props extends HostProps {
@@ -101,13 +101,20 @@ export function OverlayHost({ overlay, state, open, notify, reveal, launch }: Pr
     open({ type: 'import', request, dir, candidates, checked: new Set(candidates.map((c) => c.path)) })
   }
 
+  /** Ajoute un fichier ou importe un dossier ; si l'émulateur n'est pas encore localisé, on l'explique d'abord. */
+  const withChosenEmulator = (emulatorId: string, then: 'file' | 'folder'): void => {
+    const emulator = state.emulators.find((e) => e.id === emulatorId)
+    if (emulator && !emulator.configured) open({ type: 'emu-locate', emulatorId, then })
+    else if (then === 'file') void addEmulated(emulatorId)
+    else void scan({ kind: 'emulated', emulatorId })
+  }
+
   /** Avec un seul émulateur connu, inutile de demander lequel. */
   const withEmulator = (then: 'file' | 'folder'): void => {
     const only = state.emulators.length === 1 ? state.emulators[0] : undefined
     if (state.emulators.length === 0) notify('Aucun profil d’émulateur disponible.')
     else if (!only) open({ type: 'emulator', then })
-    else if (then === 'file') void addEmulated(only.id)
-    else void scan({ kind: 'emulated', emulatorId: only.id })
+    else withChosenEmulator(only.id, then)
   }
 
   const chooseAdd = (id: string): void => {
@@ -164,12 +171,39 @@ export function OverlayHost({ overlay, state, open, notify, reveal, launch }: Pr
           title="Quel émulateur ?"
           items={state.emulators.map((e) => ({ id: e.id, label: e.name, detail: e.configured ? e.exePath : 'à localiser' }))}
           onBack={() => open({ type: 'add' })}
+          onSelect={(id) => withChosenEmulator(id, overlay.then)}
+        />
+      )
+
+    case 'emu-locate': {
+      const emulator = state.emulators.find((e) => e.id === overlay.emulatorId)
+      const name = emulator?.name ?? 'l’émulateur'
+      const next = overlay.then === 'folder' ? 'Ensuite, tu choisiras le dossier de tes jeux.' : 'Ensuite, tu choisiras le fichier du jeu.'
+      return (
+        <Menu
+          key="emu-locate"
+          title={`Où est ${name} ?`}
+          subtitle={`Orbite ne sait pas encore où ${name} est installé sur ce PC. D’abord, choisis le programme de l’émulateur (son fichier .exe). ${next}`}
+          items={[
+            { id: 'locate', label: 'Choisir le programme de l’émulateur…' },
+            { id: 'back', label: 'Retour' }
+          ]}
+          onBack={() => open({ type: 'add' })}
           onSelect={(id) => {
-            if (overlay.then === 'file') void addEmulated(id)
-            else void scan({ kind: 'emulated', emulatorId: id })
+            if (id === 'back') {
+              open({ type: 'add' })
+              return
+            }
+            void api.locateEmulator(overlay.emulatorId).then((result) => {
+              if (!succeeded(result)) return
+              notify(`${name} trouvé.`)
+              if (overlay.then === 'file') void addEmulated(overlay.emulatorId)
+              else void scan({ kind: 'emulated', emulatorId: overlay.emulatorId })
+            })
           }}
         />
       )
+    }
 
     case 'import': {
       const { candidates, checked, request } = overlay

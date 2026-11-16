@@ -8,6 +8,8 @@ export type Overlay =
   | { type: 'add' }
   /** Choix de l'émulateur, avant d'ajouter un fichier ou d'importer un dossier. */
   | { type: 'emulator'; then: 'file' | 'folder' }
+  /** L'émulateur choisi n'est pas encore localisé : on explique avant d'ouvrir le choix du programme. */
+  | { type: 'emu-locate'; emulatorId: string; then: 'file' | 'folder' }
   | { type: 'import'; request: ScanRequest; dir: string; candidates: ImportCandidate[]; checked: ReadonlySet<string> }
   | { type: 'options'; gameId: string }
   | { type: 'remove'; gameId: string }

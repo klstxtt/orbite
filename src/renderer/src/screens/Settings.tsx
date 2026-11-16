@@ -23,7 +23,7 @@ const nextOf = <T extends { id: string }>(list: readonly T[], current: string): 
 
 type SettingsOverlay = Exclude<
   Overlay,
-  { type: 'welcome' | 'add' | 'emulator' | 'import' | 'options' | 'remove' | 'text' | 'art' | 'art-match' | 'art-pick' | 'art-key' }
+  { type: 'welcome' | 'add' | 'emulator' | 'emu-locate' | 'import' | 'options' | 'remove' | 'text' | 'art' | 'art-match' | 'art-pick' | 'art-key' }
 >
 
 /** Écrans des paramètres : profils, thèmes, son, affichage, système. */
