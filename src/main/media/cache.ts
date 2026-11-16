@@ -9,13 +9,13 @@ sharp.cache(false)
 
 export type ArtSlot = ArtKind
 
-const COVER_PX = 640
-const HERO_MAX = { width: 2560, height: 1440 }
+const COVER_PX = 1024
+const HERO_MAX = { width: 3840, height: 2160 }
 const LOGO_MAX = { width: 1000, height: 500 }
 
 /**
  * Convertit une image (fichier choisi par l'utilisateur, ou image téléchargée en mémoire) en WebP à la bonne taille et la range dans `mediaDir`.
- * Une jaquette devient un carré de 640 px ; un fond est réduit à 2560×1440 au plus et un logo à
+ * Une jaquette devient un carré de 1024 px ; un fond est réduit à 3840×2160 (4K) au plus et un logo à
  * 1000×500 au plus (transparence gardée), sans agrandissement.
  * Le nom change à chaque fois pour que l'affichage ne garde pas l'ancienne image en cache.
  */
@@ -56,7 +56,7 @@ export async function loadingBackdrop(mediaDir: string, file: string): Promise<s
   if (!file) return null
   try {
     const jpeg = await sharp(join(mediaDir, basename(file)))
-      .resize({ width: 1600, height: 900, fit: 'inside', withoutEnlargement: true })
+      .resize({ width: 3840, height: 2160, fit: 'inside', withoutEnlargement: true })
       .flatten({ background: '#000000' })
       .jpeg({ quality: 74 })
       .toBuffer()

@@ -20,17 +20,17 @@ const makePng = async (name: string, width: number, height: number): Promise<str
 }
 
 describe('storeArt', () => {
-  it('convertit une jaquette en WebP carré de 640 px', async () => {
+  it('convertit une jaquette en WebP carré de 1024 px', async () => {
     const name = await storeArt(dir, 'jeu1', 'cover', await makePng('grande.png', 1800, 1200))
     const meta = await sharp(join(dir, name)).metadata()
     expect(name).toMatch(/^jeu1-cover-[a-z0-9]+\.webp$/)
-    expect([meta.format, meta.width, meta.height]).toEqual(['webp', 640, 640])
+    expect([meta.format, meta.width, meta.height]).toEqual(['webp', 1024, 1024])
   })
 
-  it('réduit un grand fond à 2560 px de large au plus, sans agrandir un petit', async () => {
-    const big = await storeArt(dir, 'jeu1', 'hero', await makePng('4k.png', 3840, 2160))
+  it('garde un fond 4K et réduit un plus grand à 3840 px, sans agrandir un petit', async () => {
+    const big = await storeArt(dir, 'jeu1', 'hero', await makePng('5k.png', 5120, 2880))
     const small = await storeArt(dir, 'jeu2', 'hero', await makePng('petit.png', 1280, 720))
-    expect((await sharp(join(dir, big)).metadata()).width).toBe(2560)
+    expect((await sharp(join(dir, big)).metadata()).width).toBe(3840)
     expect((await sharp(join(dir, small)).metadata()).width).toBe(1280)
   })
 
