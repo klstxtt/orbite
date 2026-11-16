@@ -27,10 +27,3 @@ export const demoGames: GameView[] = DEMO.map((g, i) => ({
   args: ''
 }))
 
-/** Fausses propositions d'images, pour essayer l'écran de choix dans un navigateur. */
-export const demoImages = (kind: 'cover' | 'hero' | 'logo'): Array<{ url: string; thumb: string }> =>
-  Array.from({ length: 9 }, (_, n) => {
-    const colors = DEMO[n % DEMO.length]?.colors ?? ['#111111', '#444444', '#888888', '#ffffff']
-    const url = kind === 'hero' ? demoHero(colors, n + 20) : demoCover(kind === 'logo' ? 'Logo' : `Choix ${n + 1}`, colors, n + 20)
-    return { url, thumb: url }
-  })

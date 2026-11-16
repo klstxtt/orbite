@@ -23,7 +23,7 @@ const nextOf = <T extends { id: string }>(list: readonly T[], current: string): 
 
 type SettingsOverlay = Exclude<
   Overlay,
-  { type: 'welcome' | 'add' | 'emulator' | 'emu-locate' | 'import' | 'options' | 'remove' | 'text' | 'art' | 'art-match' | 'art-pick' | 'art-key' }
+  { type: 'welcome' | 'add' | 'emulator' | 'emu-locate' | 'import' | 'options' | 'remove' | 'text' | 'art' }
 >
 
 /** Écrans des paramètres : profils, thèmes, son, affichage, système. */
@@ -53,13 +53,12 @@ export function SettingsHost({ overlay, state, open, notify }: HostProps<Setting
             { id: 'themes', label: 'Thèmes', detail: state.themes.find((t) => t.id === state.activeTheme)?.name },
             { id: 'sound', label: 'Son' },
             { id: 'display', label: 'Affichage et manette' },
-            { id: 'art-key', label: 'Images en ligne', detail: settings.onlineArt ? 'clé enregistrée' : 'aucune clé' },
             { id: 'add', label: 'Ajouter un jeu' },
             { id: 'emulators', label: 'Émulateurs', detail: `${state.emulators.length}` },
             { id: 'system', label: 'Système' }
           ]}
           onBack={() => open(null)}
-          onSelect={(id) => open(id === 'art-key' ? { type: 'art-key', back: overlay } : ({ type: id } as Overlay))}
+          onSelect={(id) => open({ type: id } as Overlay)}
         />
       )
 

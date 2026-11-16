@@ -39,8 +39,6 @@ export const ConfigSchema = z.object({
   coverAccent: z.boolean().default(true),
   /** Les jeux joués récemment passent en premier ; sinon, ordre d'ajout. */
   sortRecent: z.boolean().default(true),
-  /** Clé API SteamGridDB de l'utilisateur ; vide = pas de recherche d'images en ligne. */
-  steamGridDbKey: z.string().default(''),
   audio: z
     .object({ sfxVolume: z.number().min(0).max(100).default(70), muted: z.boolean().default(false) })
     .prefault({}),
@@ -266,20 +264,3 @@ const artKind = z.enum(['cover', 'hero', 'logo'])
 export const ArtRequestSchema = z.object({ gameId: id, slot: artKind })
 export type ArtRequest = z.infer<typeof ArtRequestSchema>
 
-// ---------- Images en ligne (SteamGridDB) ----------
-
-export const ArtKeySchema = z.discriminatedUnion('type', [
-  /** La clé est lue dans le presse-papiers par le processus principal. */
-  z.object({ type: z.literal('paste') }),
-  z.object({ type: z.literal('set'), key: z.string().trim().min(1).max(128) }),
-  z.object({ type: z.literal('clear') })
-])
-export type ArtKeyAction = z.infer<typeof ArtKeySchema>
-
-export const ArtSearchSchema = name(120)
-export const ArtListSchema = z.object({ sgdbId: z.number().int().positive(), kind: artKind })
-export type ArtList = z.infer<typeof ArtListSchema>
-export const ArtApplySchema = z.object({ gameId: id, slot: artKind, url: z.string().url().max(500) })
-export type ArtApply = z.infer<typeof ArtApplySchema>
-export const ArtAutoSchema = z.object({ gameId: id, sgdbId: z.number().int().positive() })
-export type ArtAuto = z.infer<typeof ArtAutoSchema>

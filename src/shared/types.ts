@@ -1,19 +1,6 @@
-import type { ArtApply, ArtAuto, ArtKeyAction, ArtList, ArtRequest, GameArgs, ImportRequest, ProfileAction, RenameGame, ScanRequest, SettingsPatch, Theme, ThemeAction } from './schemas'
+import type { ArtRequest, GameArgs, ImportRequest, ProfileAction, RenameGame, ScanRequest, SettingsPatch, Theme, ThemeAction } from './schemas'
 
 export type ArtKind = 'cover' | 'hero' | 'logo'
-
-/** Un jeu trouvé sur SteamGridDB. */
-export interface OnlineGame {
-  id: number
-  name: string
-  year: number | null
-}
-
-/** Une image proposée : adresse complète et vignette. */
-export interface OnlineImage {
-  url: string
-  thumb: string
-}
 
 /** Un jeu tel que l'accueil l'affiche. */
 export interface GameView {
@@ -67,8 +54,6 @@ export interface SettingsView {
   coverAccent: boolean
   sortRecent: boolean
   rumble: boolean
-  /** Une clé SteamGridDB est enregistrée (la clé elle-même ne quitte pas le processus principal). */
-  onlineArt: boolean
 }
 
 export interface EmulatorView {
@@ -166,15 +151,6 @@ export interface Api {
   importGames(request: ImportRequest): Promise<Result<number>>
   setGameArt(request: ArtRequest): Promise<Result>
   removeGame(gameId: string): Promise<Result>
-
-  /** Enregistre (après vérification en ligne) ou efface la clé SteamGridDB. */
-  setArtKey(action: ArtKeyAction): Promise<Result>
-  artSearch(term: string): Promise<Result<OnlineGame[]>>
-  artList(request: ArtList): Promise<Result<OnlineImage[]>>
-  /** Télécharge l'image choisie et la range dans le cache. */
-  artApply(request: ArtApply): Promise<Result>
-  /** Prend la première jaquette, le premier fond et le premier logo ; renvoie le nombre d'images enregistrées. */
-  artAuto(request: ArtAuto): Promise<Result<number>>
 
   renameGame(request: RenameGame): Promise<Result>
   setGameArgs(request: GameArgs): Promise<Result>

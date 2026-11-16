@@ -27,11 +27,6 @@ const api: Api = {
   importGames: call(IPC.importGames),
   setGameArt: call(IPC.setGameArt),
   removeGame: call(IPC.removeGame),
-  setArtKey: call(IPC.setArtKey),
-  artSearch: call(IPC.artSearch),
-  artList: call(IPC.artList),
-  artApply: call(IPC.artApply),
-  artAuto: call(IPC.artAuto),
 
   renameGame: call(IPC.renameGame),
   setGameArgs: call(IPC.setGameArgs),

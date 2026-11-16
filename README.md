@@ -26,7 +26,7 @@ Inspiré d'un projet open source de [FireXcorn](https://github.com/FireXcorn) (l
 - **Tout à la manette** (ou au clavier) : navigation, sons d'interface, vibration, clavier virtuel pour écrire.
 - **Jeux PC et émulateurs** : un émulateur se décrit par un petit profil JSON. Écran noir pendant le chargement, détection du moment où le jeu est prêt, titre et icône de la fenêtre remplacés par ceux du jeu.
 - **Fiche de chaque jeu** : temps de jeu par profil, dernière session, arguments de lancement, images.
-- **Images en ligne** : jaquettes, fonds et logos depuis [SteamGridDB](https://www.steamgriddb.com) avec ta propre clé, choisis à la manette.
+- **Images en grand** : jaquettes en 1024 px et images de fond jusqu'en 4K (3840×2160), choisies depuis tes fichiers.
 - **Profils et thèmes** : plusieurs joueurs, cinq thèmes fournis, thèmes personnels avec fond d'écran, importables et exportables.
 - **Aucune édition de fichier obligatoire** : tout se règle depuis l'application.
 
@@ -34,30 +34,27 @@ Inspiré d'un projet open source de [FireXcorn](https://github.com/FireXcorn) (l
 
 <p>
 <img src="docs/images/fiche-du-jeu.jpg" alt="Fiche d'un jeu : temps de jeu, dernière session, options" width="49%">
-<img src="docs/images/choix-image.jpg" alt="Images en ligne : choisir une jaquette à la manette" width="49%">
-</p>
-
-**À gauche**, la fiche d'un jeu (temps de jeu, dernière session, options). **À droite**, le choix d'une jaquette en ligne, à la manette.
-
-<p>
 <img src="docs/images/parametres.jpg" alt="Menu des paramètres" width="49%">
-<img src="docs/images/themes.jpg" alt="Choix du thème" width="49%">
 </p>
 
-**À gauche**, les paramètres. **À droite**, le choix du thème.
+**À gauche**, la fiche d'un jeu (temps de jeu, dernière session, options). **À droite**, les paramètres.
+
+<p align="center"><img src="docs/images/themes.jpg" alt="Choix du thème" width="700"><br><b>Le choix du thème</b></p>
 
 <p align="center"><img src="docs/images/theme-minuit.jpg" alt="Accueil avec le thème Minuit" width="700"><br><b>Le thème Minuit</b></p>
 
 ## Avec une vraie bibliothèque
 
-Une fois les jeux ajoutés et leurs images choisies, la jaquette du jeu sélectionné prend toute la place en fond d'écran et le contour de sélection prend sa couleur.
+Une fois les jeux ajoutés et leurs images choisies, l'image du jeu sélectionné prend tout l'écran en fond, en 4K, et le contour de sélection prend la couleur de sa jaquette.
 
-<img src="docs/images/reel-pokopia.jpg" alt="Accueil avec une vraie bibliothèque, jeu sélectionné en fond d'écran">
+<img src="docs/images/reel-pokopia.jpg" alt="Accueil avec une vraie bibliothèque, Pokémon Pokopia sélectionné">
 
 <p>
-<img src="docs/images/reel-animal-crossing.jpg" alt="Accueil, un autre jeu sélectionné" width="49%">
-<img src="docs/images/reel-smash.jpg" alt="Accueil, un troisième jeu sélectionné" width="49%">
+<img src="docs/images/reel-zelda.jpg" alt="Accueil, Zelda sélectionné" width="49%">
+<img src="docs/images/reel-animal-crossing.jpg" alt="Accueil, Animal Crossing sélectionné" width="49%">
 </p>
+
+<p align="center"><img src="docs/images/reel-smash.jpg" alt="Accueil, Super Smash Bros. Ultimate sélectionné" width="700"></p>
 
 Le contour de sélection change de couleur avec chaque jaquette. La fiche du jeu montre le temps de jeu, la dernière session et l'émulateur utilisé :
 
@@ -109,17 +106,13 @@ Retirer un jeu l'enlève du lanceur ; ses fichiers sur le disque ne sont pas tou
 
 ### Images des jeux
 
-Dans la fiche d'un jeu, « Images… » propose deux façons de faire :
+Dans la fiche d'un jeu, « Images… » permet de choisir, depuis un fichier de ton disque :
 
-- **Choisir un fichier** : une image de ton disque pour la jaquette (carrée de préférence), l'image de fond ou le logo.
-- **Chercher en ligne** : les images viennent de [SteamGridDB](https://www.steamgriddb.com), avec ta clé personnelle.
+- **la jaquette** : une image carrée de préférence, gardée en 1024 px ;
+- **l'image de fond** : en 16:9, gardée jusqu'en 4K (3840×2160) ;
+- **le logo** : à fond transparent de préférence, affiché pendant qu'un jeu tourne.
 
-Pour la recherche en ligne :
-
-1. Crée un compte gratuit sur steamgriddb.com, puis copie ta clé dans Préférences > API.
-2. Dans le lanceur : Paramètres > Images en ligne > « Coller la clé depuis le presse-papiers ».
-
-La clé est vérifiée, puis enregistrée seulement sur ton PC, dans `config.json`.
+Les images sont converties en WebP et rangées dans le dossier `media` du lanceur ; le fichier d'origine n'est pas modifié.
 
 ## Ajouter un émulateur
 
@@ -192,7 +185,7 @@ Tout est dans `%APPDATA%\Orbite\` :
 
 | Fichier ou dossier | Contenu |
 | --- | --- |
-| `config.json` | Réglages, profils, emplacement des émulateurs, clé SteamGridDB. |
+| `config.json` | Réglages, profils, emplacement des émulateurs. |
 | `library.json` | Les jeux. |
 | `stats.json` | Temps de jeu par profil et dernières sessions. |
 | `emulators\` | Tes profils d'émulateur. |
@@ -215,8 +208,6 @@ Chaque fichier JSON a une copie de secours `.bak`. Un fichier illisible est mis 
 **Une tuile est grisée.** Le programme ou le fichier du jeu n'est plus à sa place. Remets-le, ou retire le jeu et ajoute-le de nouveau.
 
 **L'icône Wi-Fi ne montre pas la force du signal.** Windows ne donne ce chiffre que si l'accès à la localisation est activé. Sans lui, l'icône indique seulement que le Wi-Fi est connecté.
-
-**SteamGridDB refuse la clé ou ne répond pas.** Vérifie la clé dans Paramètres > Images en ligne et la connexion Internet. Tu peux toujours choisir une image depuis un fichier.
 
 **La manette ne réagit pas.** Appuie sur un bouton : Windows ne signale une manette qu'après une première pression. L'icône de manette en bas à gauche s'allume quand elle est reconnue.
 

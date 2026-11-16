@@ -1,14 +1,9 @@
-import { app, clipboard, dialog, ipcMain, type BrowserWindow, type OpenDialogOptions } from 'electron'
+import { app, dialog, ipcMain, type BrowserWindow, type OpenDialogOptions } from 'electron'
 import { existsSync } from 'fs'
 import { z } from 'zod'
 import { IPC } from '../../shared/ipc'
 import {
-  ArtApplySchema,
-  ArtAutoSchema,
-  ArtKeySchema,
-  ArtListSchema,
   ArtRequestSchema,
-  ArtSearchSchema,
   IdSchema,
   ImportRequestSchema,
   ScanRequestSchema,
@@ -21,7 +16,6 @@ import type { Launcher } from '../launch/launcher'
 import { scanGameFiles, scanPcFolder } from '../library/importer'
 import type { LibraryService } from '../library/service'
 import { coverAccent, coverIconPng, loadingBackdrop, mediaUrl, removeArt, storeArt } from '../media/cache'
-import { downloadImage, listImages, searchGames } from '../media/steamgrid'
 import type { Stores } from '../store/stores'
 import type { ThemeStore } from '../themes/store'
 import { registerSettingsIpc } from './settings'
@@ -76,8 +70,7 @@ export function buildState(ctx: AppContext): AppState {
       autoStart: config.autoStart,
       coverAccent: config.coverAccent,
       sortRecent: config.sortRecent,
-      rumble: config.input.rumble,
-      onlineArt: config.steamGridDbKey !== ''
+      rumble: config.input.rumble
     },
     themes: ctx.themes.list().map((t) => {
       const stamp = ctx.themes.wallpaperStamp(t.id)
@@ -198,7 +191,6 @@ export function registerIpc(ctx: AppContext): void {
     removeArt(ctx.stores.mediaDir, ctx.library.setArt(gameId, slot, file))
     if (slot === 'cover') ctx.library.setAccent(gameId, await coverAccent(ctx.stores.mediaDir, file))
   }
-  const artKey = (): string => ctx.stores.config.get().steamGridDbKey
 
   handle(IPC.systemStatus, NO_INPUT, () => readSystemStatus())
   handle(IPC.toggleFullscreen, NO_INPUT, () => {
@@ -294,50 +286,6 @@ export function registerIpc(ctx: AppContext): void {
     await applyArt(gameId, slot, source)
     broadcast(ctx)
     return ok(null)
-  })
-
-  // ---------- Images en ligne (SteamGridDB) ----------
-
-  handle(IPC.setArtKey, ArtKeySchema, async (action) => {
-    let key = ''
-    if (action.type !== 'clear') {
-      key = (action.type === 'paste' ? await clipboard.readText() : action.key).trim()
-      if (!/^[\w-]{16,128}$/.test(key)) {
-        throw new Error(action.type === 'paste' ? 'Le presse-papiers ne contient pas de clé SteamGridDB.' : 'Cette clé n’a pas la bonne forme.')
-      }
-      // Une recherche d'essai : une clé refusée lève une erreur lisible et n'est pas enregistrée.
-      await searchGames(key, 'test')
-    }
-    ctx.stores.config.update((c) => ({ ...c, steamGridDbKey: key }))
-    broadcast(ctx)
-    return ok(null)
-  })
-
-  handle(IPC.artSearch, ArtSearchSchema, async (term) => ok(await searchGames(artKey(), term)))
-  handle(IPC.artList, ArtListSchema, async ({ sgdbId, kind }) => ok(await listImages(artKey(), sgdbId, kind)))
-
-  handle(IPC.artApply, ArtApplySchema, async ({ gameId, slot, url }) => {
-    await applyArt(gameId, slot, await downloadImage(url))
-    broadcast(ctx)
-    return ok(null)
-  })
-
-  handle(IPC.artAuto, ArtAutoSchema, async ({ gameId, sgdbId }) => {
-    ctx.library.find(gameId)
-    let saved = 0
-    for (const kind of ['cover', 'hero', 'logo'] as const) {
-      const first = (await listImages(artKey(), sgdbId, kind))[0]
-      if (!first) continue
-      try {
-        await applyArt(gameId, kind, await downloadImage(first.url))
-        saved++
-      } catch {
-        // Une image illisible n'empêche pas les autres.
-      }
-    }
-    broadcast(ctx)
-    if (saved === 0) throw new Error('Aucune image trouvée pour ce jeu.')
-    return ok(saved)
   })
 
   handle(IPC.removeGame, IdSchema, (gameId) => {
